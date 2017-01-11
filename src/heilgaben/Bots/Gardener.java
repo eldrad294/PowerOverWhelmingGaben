@@ -14,8 +14,8 @@ public class Gardener extends BotState {
                 /* Update State */
                 BotState.update();
 
-                /* Round Actions
-
+                /* Round Actions */
+                act();
 
                 /* Yield round */
                 Clock.yield();
@@ -32,6 +32,14 @@ public class Gardener extends BotState {
 
         } catch (Exception e){
             Debug.out("Init Exception");
+        }
+    }
+
+    private static void act() {
+        try {
+
+        } catch (Exception e){
+            Debug.out("Act Exception");
         }
     }
 }
