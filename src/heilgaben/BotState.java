@@ -4,7 +4,7 @@ import battlecode.common.*;
 
 public class BotState {
     /* Robot Info */
-    static RobotController rc;
+    public static RobotController rc;
     public static int myID;
     public static MapLocation myLocation;
 

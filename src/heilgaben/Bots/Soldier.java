@@ -32,6 +32,7 @@ public class Soldier extends BotState {
 
         } catch (Exception e){
             Debug.out("Init Exception");
+            e.printStackTrace();
         }
     }
 
@@ -40,6 +41,7 @@ public class Soldier extends BotState {
 
         } catch (Exception e){
             Debug.out("Act Exception");
+            e.printStackTrace();
         }
     }
 }
