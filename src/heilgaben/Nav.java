@@ -98,8 +98,8 @@ public class Nav extends BotState {
         return false;
     }
 
-    static float getMaxMoveDistance(Direction direction){
-        float stride = myType.strideRadius;
+    public static float getMaxMoveDistance(Direction direction){
+        float stride = myStrideRadius;
         int maxPrecision = 4;
         int precisionCounter = 0;
 

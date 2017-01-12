@@ -2,6 +2,8 @@ package heilgaben;
 
 import battlecode.common.*;
 
+import static heilgaben.Util.setCenter;
+
 public class BotState {
     /* Robot Info */
     public static RobotController rc;
@@ -32,6 +34,9 @@ public class BotState {
     public static RobotInfo[] nearbyAllies;
     public static TreeInfo[] nearbyTrees;
     public static BulletInfo[] nearbyBullets;
+    public static MapLocation[] ourStartingLocations;
+    public static MapLocation[] enemyStartingLocations;
+    public static MapLocation center;
 
     public static void init(RobotController inRc) {
         /* Robot Info */
@@ -52,10 +57,15 @@ public class BotState {
         myMaxHealth = myType.maxHealth;
         mySpawnSource = myType.spawnSource;
         myStrideRadius = myType.strideRadius;
-
         /* Team Info */
         myTeam = rc.getTeam();
         enemyTeam = rc.getTeam().opponent();
+
+        /* Surroundings Info */
+        ourStartingLocations = rc.getInitialArchonLocations(myTeam);
+        enemyStartingLocations = rc.getInitialArchonLocations(enemyTeam);
+
+        setCenter();
     }
 
     public static void update() {

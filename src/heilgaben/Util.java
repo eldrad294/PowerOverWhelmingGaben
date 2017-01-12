@@ -3,14 +3,6 @@ package heilgaben;
 import battlecode.common.*;
 
 public class Util extends BotState {
-
-    public static float getRadialSpawnInterval(float spawnRobotRadius) {
-        float radius = myBodyRadius + spawnRobotRadius;
-        double perimeter = 2 * Math.PI * radius;
-        int spawnCount = (int) (Math.floor(perimeter) / (spawnRobotRadius * 2));
-        return (float) (Math.PI * 2) / spawnCount;
-    }
-
     public static Direction getRobotSpawnDirection(RobotType robotType) {
         float interval = getRadialSpawnInterval(robotType.bodyRadius);
 
@@ -32,5 +24,27 @@ public class Util extends BotState {
         }
 
         return null;
+    }
+
+    private static float getRadialSpawnInterval(float spawnObjectRadius) {
+        float radius = myBodyRadius + spawnObjectRadius;
+        double perimeter = 2 * Math.PI * radius;
+        int spawnCount = (int) (Math.floor(perimeter) / (spawnObjectRadius * 2));
+        return (float) (Math.PI * 2) / spawnCount;
+    }
+
+    public static void setCenter() {
+        int xavg = 0, yavg = 0;
+
+        for (int i = 0; i < ourStartingLocations.length; i++) {
+            xavg += ourStartingLocations[i].x;
+            yavg += ourStartingLocations[i].y;
+
+            xavg += enemyStartingLocations[i].x;
+            yavg += enemyStartingLocations[i].y;
+        }
+
+        center = new MapLocation(Math.round(xavg / (ourStartingLocations.length + enemyStartingLocations.length)), Math.round(yavg / (ourStartingLocations.length + enemyStartingLocations.length)));
+        Debug.out("Center at: " + center);
     }
 }

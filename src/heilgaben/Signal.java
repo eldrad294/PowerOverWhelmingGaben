@@ -1,13 +1,17 @@
 package heilgaben;
 
+import java.io.Serializable;
+
 /**
  * Signaling Class
  */
-
 public class Signal extends BotState {
     public static final int NO_DATA = 0x000000;
     public static final int NO_CHANNEL = 0x000000;
 
+    /**
+     * CHANNEL MASKS
+     */
     public static final int ARCHON = 0x000001;
     public static final int SCOUT = 0x000002;
     public static final int SOLDIER = 0x000003;
@@ -17,6 +21,9 @@ public class Signal extends BotState {
     public static final int TREE = 0x000007;
     public static final int BORDER = 0x000008;
     public static final int ENEMY = 0x000009;
+    public static final int CENTER = 0x00000a;
+    public static final int NORTH_WEST = 0x00000b;
+    public static final int SOUTH_EAST = 0x00000c;
 
     /**
      * CHANNELS
@@ -43,7 +50,7 @@ public class Signal extends BotState {
 
     public static void broadcastCommand(int channel, int command){
         try {
-            rc.broadcast(SCOUT + COMMAND_CHANNEL, command);
+            rc.broadcast(channel, command);
         } catch (Exception e){
             Debug.out("Command Exception");
             e.printStackTrace();
@@ -52,7 +59,7 @@ public class Signal extends BotState {
 
     public static void broadcastReport(int channel, int report){
         try {
-            rc.broadcast(SCOUT | REPORT_CHANNEL, report);
+            rc.broadcast(channel, report);
         } catch (Exception e) {
             Debug.out("Report Exception");
             e.printStackTrace();
