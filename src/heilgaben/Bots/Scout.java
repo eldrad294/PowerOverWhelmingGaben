@@ -1,15 +1,11 @@
 package heilgaben.Bots;
 
 import battlecode.common.*;
-import heilgaben.Debug;
-import heilgaben.BotState;
-import heilgaben.Nav;
-import heilgaben.Signal;
+import heilgaben.*;
 
 public class Scout extends BotState {
 
     static Direction[] closestBorderDirection = new Direction[2];
-    static int[] border = {-1, -1, -1, -1};
 
     public static void run() throws GameActionException {
         /* Scout specific init */
@@ -35,7 +31,8 @@ public class Scout extends BotState {
 
     private static void init() {
         try {
-            initBorders();
+            Util.initCenter();
+            Util.initBorders();
             initClosestBorders();
         } catch (Exception e){
             Debug.out("Init Exception");
@@ -45,10 +42,12 @@ public class Scout extends BotState {
 
     private static void act() {
         try {
-            Debug.out("Borders: (" + border[0] + ", " + border[1] + ") - (" + border[2] + ", " + border[3] + ")");
-            if(!isBorderDetected()) {
-                detectBorders();
-            }
+            if(!isBorderDetected())
+                estimateBorders();
+
+            Util.updateBorders();
+            Nav.move(Nav.getMoveDirection(center));
+
         } catch (Exception e){
             Debug.out("Act Exception");
             e.printStackTrace();
@@ -72,26 +71,20 @@ public class Scout extends BotState {
         closestBorderDirection[1] = closestY;
     }
 
-    private static void initBorders() {
-        if(Signal.receiveReport(Signal.BORDER) == Signal.DETECTED) {
-            int[] northWest = Signal.receiveData(Signal.DATA_CHANNEL_X | Signal.NORTH_WEST, Signal.DATA_CHANNEL_Y | Signal.NORTH_WEST);
-            int[] southEast = Signal.receiveData(Signal.DATA_CHANNEL_X | Signal.SOUTH_EAST, Signal.DATA_CHANNEL_Y | Signal.SOUTH_EAST);
-            border[0] = northWest[0];
-            border[1] = northWest[1];
-            border[2] = southEast[0];
-            border[3] = southEast[1];
-        }
+    private static void detectArchons() {
+
     }
 
-    private static void detectBorders(){
+    private static void estimateBorders(){
         for (Direction direction : closestBorderDirection) {
-            if (!detectBorder(direction)) break;
+            if (!estimateBorder(direction)) break;
         }
 
-        Signal.broadcastReport(Signal.BORDER, Signal.DETECTED);
+        state = State.NONE;
+        Signal.broadcastSignal(Signal.BORDER, Signal.DETECTED);
     }
 
-    private static boolean detectBorder(Direction borderDirection) {
+    private static boolean estimateBorder(Direction borderDirection) {
         try {
             if(borderDirection.radians == Direction.getNorth().radians|| borderDirection.radians == Direction.getSouth().radians){
                 if(isBorderYDetected()) return true;
@@ -102,38 +95,39 @@ public class Scout extends BotState {
             if(rc.hasMoved())
                 return false;
 
-            float stride = Nav.getMaxMoveDistance(borderDirection);
-            if(rc.canMove(borderDirection, stride)) {
-                rc.move(borderDirection, stride);
-            }
-            else {
+            if(borderDirection.radians%Math.PI == 0)
+                state = State.DETECTING_BORDER_X;
+            else
+                state = State.DETECTING_BORDER_Y;
+
+            if(!Nav.move(Nav.getMoveDirection(myLocation.add(borderDirection)))) {
                 if(borderDirection.radians == Direction.getWest().radians) {
                     Debug.out("West Map: " + (myLocation.x - myBodyRadius));
                     border[0] = (int) Math.ceil(myLocation.x - myBodyRadius);
-                    border[2] = (int) ((center.x - border[0]) + center.x);
+                    border[2] = (int) Math.floor(center.x + (center.x - border[0]));
                     int[] data = {border[0], border[2]};
-                    Signal.broadcastData(Signal.DATA_CHANNEL_X | Signal.NORTH_WEST, Signal.DATA_CHANNEL_X | Signal.SOUTH_EAST, data);
+                    Signal.broadcastCoordinate(Signal.DATA_CHANNEL_X | Signal.NORTH_WEST, Signal.DATA_CHANNEL_X | Signal.SOUTH_EAST, data);
                 }
                 if(borderDirection.radians == Direction.getNorth().radians) {
-                    Debug.out("North Map: " + (myLocation.y - myBodyRadius));
-                    border[1] = (int) Math.ceil(myLocation.y - myBodyRadius);
-                    border[3] = (int) ((center.y - border[1]) + center.y);
+                    Debug.out("North Map: " + (myLocation.y + myBodyRadius));
+                    border[1] = (int) Math.floor(myLocation.y + myBodyRadius);
+                    border[3] = (int) Math.ceil(center.y - (border[1] - center.y));
                     int[] data = {border[1], border[3]};
-                    Signal.broadcastData(Signal.DATA_CHANNEL_Y | Signal.NORTH_WEST, Signal.DATA_CHANNEL_Y | Signal.SOUTH_EAST, data);
+                    Signal.broadcastCoordinate(Signal.DATA_CHANNEL_Y | Signal.NORTH_WEST, Signal.DATA_CHANNEL_Y | Signal.SOUTH_EAST, data);
                 }
                 if(borderDirection.radians == Direction.getEast().radians) {
                     Debug.out("East Map: " + (myLocation.x + myBodyRadius));
                     border[2] = (int) Math.floor(myLocation.x + myBodyRadius);
-                    border[0] = (int) (border[2] - (2 * (border[2] - center.x)));
+                    border[0] = (int) Math.ceil(center.x - (border[2] - center.x));
                     int[] data = {border[0], border[2]};
-                    Signal.broadcastData(Signal.DATA_CHANNEL_X | Signal.SOUTH_EAST, Signal.DATA_CHANNEL_X | Signal.NORTH_WEST, data);
+                    Signal.broadcastCoordinate(Signal.DATA_CHANNEL_X | Signal.NORTH_WEST, Signal.DATA_CHANNEL_X | Signal.SOUTH_EAST, data);
                 }
                 if(borderDirection.radians == Direction.getSouth().radians) {
-                    Debug.out("South Map: " + (myLocation.y + myBodyRadius));
-                    border[3] = (int) Math.floor(myLocation.y + myBodyRadius);
-                    border[1] = (int) (border[3] - (2 * (border[3] - center.y)));
-                    int[] data = {border[3], border[1]};
-                    Signal.broadcastData(Signal.DATA_CHANNEL_Y | Signal.SOUTH_EAST, Signal.DATA_CHANNEL_Y | Signal.NORTH_WEST, data);
+                    Debug.out("South Map: " + (myLocation.y - myBodyRadius));
+                    border[3] = (int) Math.ceil(myLocation.y - myBodyRadius);
+                    border[1] = (int) Math.floor(center.y + (center.y - border[3]));
+                    int[] data = {border[1], border[3]};
+                    Signal.broadcastCoordinate(Signal.DATA_CHANNEL_Y | Signal.NORTH_WEST, Signal.DATA_CHANNEL_Y | Signal.SOUTH_EAST, data);
                 }
             }
         } catch (Exception e) {

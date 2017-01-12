@@ -48,25 +48,16 @@ public class Signal extends BotState {
      */
     public static final int DETECTED = 0x0f0000;
 
-    public static void broadcastCommand(int channel, int command){
-        try {
-            rc.broadcast(channel, command);
-        } catch (Exception e){
-            Debug.out("Command Exception");
-            e.printStackTrace();
-        }
-    }
-
-    public static void broadcastReport(int channel, int report){
+    public static void broadcastSignal(int channel, int report){
         try {
             rc.broadcast(channel, report);
         } catch (Exception e) {
-            Debug.out("Report Exception");
+            Debug.out("Signal Exception");
             e.printStackTrace();
         }
     }
 
-    public static void broadcastData(int channelX, int channelY, int[] data){
+    public static void broadcastCoordinate(int channelX, int channelY, int[] data){
         try {
             if(channelX != NO_DATA)
                 rc.broadcast(channelX, data[0]);
@@ -78,36 +69,32 @@ public class Signal extends BotState {
         }
     }
 
-    public static int receiveCommand(int channel){
+    public static int receiveSignal(int channel){
         try {
             return rc.readBroadcast(channel);
         } catch (Exception e) {
-            Debug.out("Receive Command Exception");
+            Debug.out("Receive Signal Exception");
             e.printStackTrace();
             return NO_DATA;
         }
     }
 
-    public static int receiveReport(int channel){
-
-        try{
-            return rc.readBroadcast(channel);
-        } catch (Exception e) {
-            Debug.out("Receive Command Exception");
-            e.printStackTrace();
-            return NO_DATA;
-        }
-    }
-
-    public static int[] receiveData(int channelX, int channelY){
+    public static int[] receiveCoordinate(int channelX, int channelY){
         try{
             int[] coord = {rc.readBroadcast(channelX), rc.readBroadcast(channelY)};
             return coord;
         } catch (Exception e) {
-            Debug.out("Receive Command Exception");
+            Debug.out("Receive Coordinate Exception");
             e.printStackTrace();
             int[] coord = {NO_CHANNEL, NO_CHANNEL};
             return coord;
         }
+    }
+
+    public static int[] receiveBorders(){
+        int[] northWest = Signal.receiveCoordinate(Signal.DATA_CHANNEL_X | Signal.NORTH_WEST, Signal.DATA_CHANNEL_Y | Signal.NORTH_WEST);
+        int[] southEast = Signal.receiveCoordinate(Signal.DATA_CHANNEL_X | Signal.SOUTH_EAST, Signal.DATA_CHANNEL_Y | Signal.SOUTH_EAST);
+        int[] borders = {northWest[0], northWest[1], southEast[0], southEast[1]};
+        return borders;
     }
 }

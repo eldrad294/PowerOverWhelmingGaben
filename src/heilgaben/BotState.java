@@ -2,13 +2,13 @@ package heilgaben;
 
 import battlecode.common.*;
 
-import static heilgaben.Util.setCenter;
-
 public class BotState {
     /* Robot Info */
     public static RobotController rc;
     public static int myID;
     public static MapLocation myLocation;
+    public static MapLocation targetLocation = null;
+    public static State state = State.NONE;
 
     /* Type Info */
     public static RobotType myType;
@@ -37,6 +37,7 @@ public class BotState {
     public static MapLocation[] ourStartingLocations;
     public static MapLocation[] enemyStartingLocations;
     public static MapLocation center;
+    public static int[] border = {-1, -1, -1, -1};
 
     public static void init(RobotController inRc) {
         /* Robot Info */
@@ -64,11 +65,10 @@ public class BotState {
         /* Surroundings Info */
         ourStartingLocations = rc.getInitialArchonLocations(myTeam);
         enemyStartingLocations = rc.getInitialArchonLocations(enemyTeam);
-
-        setCenter();
     }
 
     public static void update() {
+
         /* Robot Info */
         myLocation = rc.getLocation();
 
