@@ -42,7 +42,7 @@ public class Nav extends BotState {
         if(destination != myLocation)
             allDirections.add(new Direction(myLocation, destination));
 
-        // TO DO - Use vectors with magnitude instead of Directions
+        // TODO : Use vectors with magnitude instead of Directions
         ArrayList<Direction> repulsiveDirections = getRepulsiveDirections(myBodyRadius*2);
         allDirections.addAll(repulsiveDirections);
 

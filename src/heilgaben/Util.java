@@ -64,7 +64,7 @@ public class Util extends BotState {
         center = new MapLocation(Math.round(xavg / (ourStartingLocations.length + enemyStartingLocations.length)), Math.round(yavg / (ourStartingLocations.length + enemyStartingLocations.length)));
     }
 
-    // TO DO : Take a closer look - make more efficient
+    // TODO : Take a closer look - make more efficient
     public static Direction getClosestBorder(){
         float west = myLocation.x - border[0];
         float north = myLocation.y - border[1];
@@ -103,7 +103,7 @@ public class Util extends BotState {
         }
     }
 
-    // TO DO : Fix this after fixing closestBorder
+    // TODO : Fix this after fixing closestBorder
     public static void updateBorders(){
         if(Signal.receiveSignal(Signal.BORDER) != Signal.DETECTED)
             return;

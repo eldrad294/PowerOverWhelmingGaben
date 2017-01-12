@@ -57,12 +57,12 @@ public class Signal extends BotState {
         }
     }
 
-    public static void broadcastCoordinate(int channelX, int channelY, int[] data){
+    public static void broadcastCoordinate(int channelX, int channelY, float[] data){
         try {
             if(channelX != NO_DATA)
-                rc.broadcast(channelX, data[0]);
+                rc.broadcast(channelX, Float.floatToIntBits(data[0]));
             if(channelY != NO_DATA)
-                rc.broadcast(channelY, data[1]);
+                rc.broadcast(channelY, Float.floatToIntBits(data[1]));
         } catch (Exception e) {
             Debug.out("Data Exception");
             e.printStackTrace();
@@ -79,22 +79,22 @@ public class Signal extends BotState {
         }
     }
 
-    public static int[] receiveCoordinate(int channelX, int channelY){
+    public static float[] receiveCoordinate(int channelX, int channelY){
         try{
-            int[] coord = {rc.readBroadcast(channelX), rc.readBroadcast(channelY)};
+            float[] coord = { Float.intBitsToFloat(rc.readBroadcast(channelX)), Float.intBitsToFloat(rc.readBroadcast(channelY))};
             return coord;
         } catch (Exception e) {
             Debug.out("Receive Coordinate Exception");
             e.printStackTrace();
-            int[] coord = {NO_CHANNEL, NO_CHANNEL};
+            float[] coord = {NO_CHANNEL, NO_CHANNEL};
             return coord;
         }
     }
 
-    public static int[] receiveBorders(){
-        int[] northWest = Signal.receiveCoordinate(Signal.DATA_CHANNEL_X | Signal.NORTH_WEST, Signal.DATA_CHANNEL_Y | Signal.NORTH_WEST);
-        int[] southEast = Signal.receiveCoordinate(Signal.DATA_CHANNEL_X | Signal.SOUTH_EAST, Signal.DATA_CHANNEL_Y | Signal.SOUTH_EAST);
-        int[] borders = {northWest[0], northWest[1], southEast[0], southEast[1]};
+    public static float[] receiveBorders(){
+        float[] northWest = Signal.receiveCoordinate(Signal.DATA_CHANNEL_X | Signal.NORTH_WEST, Signal.DATA_CHANNEL_Y | Signal.NORTH_WEST);
+        float[] southEast = Signal.receiveCoordinate(Signal.DATA_CHANNEL_X | Signal.SOUTH_EAST, Signal.DATA_CHANNEL_Y | Signal.SOUTH_EAST);
+        float[] borders = {northWest[0], northWest[1], southEast[0], southEast[1]};
         return borders;
     }
 }

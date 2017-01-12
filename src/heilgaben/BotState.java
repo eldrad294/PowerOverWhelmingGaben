@@ -37,7 +37,7 @@ public class BotState {
     public static MapLocation[] ourStartingLocations;
     public static MapLocation[] enemyStartingLocations;
     public static MapLocation center;
-    public static int[] border = {-1, -1, -1, -1};
+    public static float[] border = {-1, -1, -1, -1};
 
     public static void init(RobotController inRc) {
         /* Robot Info */

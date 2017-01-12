@@ -45,8 +45,8 @@ public class Scout extends BotState {
             if(!isBorderDetected())
                 estimateBorders();
 
-            Util.updateBorders();
-            Nav.move(Nav.getMoveDirection(center));
+            //Util.updateBorders();
+            //Nav.move(Nav.getMoveDirection(center));
 
         } catch (Exception e){
             Debug.out("Act Exception");
@@ -102,34 +102,42 @@ public class Scout extends BotState {
 
             if(!Nav.move(Nav.getMoveDirection(myLocation.add(borderDirection)))) {
                 if(borderDirection.radians == Direction.getWest().radians) {
-                    Debug.out("West Map: " + (myLocation.x - myBodyRadius));
-                    border[0] = (int) Math.ceil(myLocation.x - myBodyRadius);
-                    border[2] = (int) Math.floor(center.x + (center.x - border[0]));
-                    int[] data = {border[0], border[2]};
+                    border[0] = myLocation.x - myBodyRadius;
+                    border[2] = center.x + (center.x - border[0]);
+                    Debug.out("West Border: " + border[0]);
+                    Debug.out("East Border: " + border[2]);
+                    float[] data = {border[0], border[2]};
                     Signal.broadcastCoordinate(Signal.DATA_CHANNEL_X | Signal.NORTH_WEST, Signal.DATA_CHANNEL_X | Signal.SOUTH_EAST, data);
                 }
                 if(borderDirection.radians == Direction.getNorth().radians) {
-                    Debug.out("North Map: " + (myLocation.y + myBodyRadius));
-                    border[1] = (int) Math.floor(myLocation.y + myBodyRadius);
-                    border[3] = (int) Math.ceil(center.y - (border[1] - center.y));
-                    int[] data = {border[1], border[3]};
+                    border[1] = myLocation.y + myBodyRadius;
+                    border[3] = center.y - (border[1] - center.y);
+                    Debug.out("North Border: " + border[1]);
+                    Debug.out("South Border: " + border[3]);
+                    float[] data = {border[1], border[3]};
                     Signal.broadcastCoordinate(Signal.DATA_CHANNEL_Y | Signal.NORTH_WEST, Signal.DATA_CHANNEL_Y | Signal.SOUTH_EAST, data);
                 }
                 if(borderDirection.radians == Direction.getEast().radians) {
-                    Debug.out("East Map: " + (myLocation.x + myBodyRadius));
-                    border[2] = (int) Math.floor(myLocation.x + myBodyRadius);
-                    border[0] = (int) Math.ceil(center.x - (border[2] - center.x));
-                    int[] data = {border[0], border[2]};
+                    border[2] = myLocation.x + myBodyRadius;
+                    border[0] = center.x - (border[2] - center.x);
+                    Debug.out("West Border: " + border[0]);
+                    Debug.out("East Border: " + border[2]);
+                    float[] data = {border[0], border[2]};
                     Signal.broadcastCoordinate(Signal.DATA_CHANNEL_X | Signal.NORTH_WEST, Signal.DATA_CHANNEL_X | Signal.SOUTH_EAST, data);
                 }
                 if(borderDirection.radians == Direction.getSouth().radians) {
-                    Debug.out("South Map: " + (myLocation.y - myBodyRadius));
-                    border[3] = (int) Math.ceil(myLocation.y - myBodyRadius);
-                    border[1] = (int) Math.floor(center.y + (center.y - border[3]));
-                    int[] data = {border[1], border[3]};
+                    border[3] = myLocation.y - myBodyRadius;
+                    border[1] = center.y + (center.y - border[3]);
+                    Debug.out("South Border: " + border[3]);
+                    Debug.out("North Border: " + border[1]);
+                    float[] data = {border[1], border[3]};
                     Signal.broadcastCoordinate(Signal.DATA_CHANNEL_Y | Signal.NORTH_WEST, Signal.DATA_CHANNEL_Y | Signal.SOUTH_EAST, data);
                 }
             }
+
+            float[] borders = Signal.receiveBorders();
+            Debug.out(borders[0], borders[1]);
+            Debug.out(borders[2], borders[3]);
         } catch (Exception e) {
             Debug.out("Detect Border Exception");
             e.printStackTrace();
