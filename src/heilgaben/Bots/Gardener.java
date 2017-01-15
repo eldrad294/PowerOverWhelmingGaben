@@ -30,6 +30,7 @@ public class Gardener extends BotState {
         try {
             Util.initCenter();
             Util.initBorders();
+            state = State.SEARCHING_GARDEN_SPOT;
         } catch (Exception e){
             Debug.out("Init Exception");
             e.printStackTrace();
@@ -40,39 +41,48 @@ public class Gardener extends BotState {
         try {
             Util.updateBorders();
 
-            if(rc.senseNearbyRobots(3).length == 0 && rc.senseNearbyTrees(5).length == 0)
-                state = State.PLANTING_GARDEN;
-
-            if(state != State.PLANTING_GARDEN) {
-                spawn(RobotType.SCOUT);
-                Nav.move(Nav.getMoveDirection(myLocation));
-            } else {
-                plant();
-                water();
+            switch(state){
+                case SEARCHING_GARDEN_SPOT:
+                    search();
+                    break;
+                case PLANTING_GARDEN:
+                    plant();
+                    water();
+                    break;
+                case TENDING_GARDEN:
+                    spawn(RobotType.SCOUT);
+                    water();
+                    break;
+                default:
+                    Nav.move(Nav.getMoveDirection(myLocation));
+                    break;
             }
-
         } catch (Exception e){
             Debug.out("Act Exception");
             e.printStackTrace();
         }
     }
 
-    private static boolean spawn(RobotType robotType) {
-        try {
-            Direction spawnDirection = Util.getRobotSpawnDirection(robotType);
-            if(spawnDirection != null) {
-                rc.buildRobot(robotType, spawnDirection);
-                return true;
-            }
-        } catch (Exception e) {
-            Debug.out("Spawn Exception");
-            e.printStackTrace();
+    private static boolean search(){
+        // Check for state change
+        if(rc.senseNearbyRobots(3).length == 0 && rc.senseNearbyTrees(5).length == 0) {
+            state = State.PLANTING_GARDEN;
+            return true;
         }
 
+        // Act according to state
+        Nav.move(Nav.getMoveDirection(myLocation));
         return false;
     }
 
     private static boolean plant(){
+        // Check for state change
+        if(rc.senseNearbyTrees(3, myTeam).length >= 5){
+            state = State.TENDING_GARDEN;
+            return true;
+        }
+
+        // Act according to state;
         try {
             Direction spawnDirection = Util.getPlantDirection();
             if(spawnDirection == null)
@@ -116,4 +126,21 @@ public class Gardener extends BotState {
 
         return false;
     }
+
+    private static boolean spawn(RobotType robotType) {
+        try {
+            Direction spawnDirection = Util.getRobotSpawnDirection(robotType);
+            if(spawnDirection != null) {
+                rc.buildRobot(robotType, spawnDirection);
+                return true;
+            }
+        } catch (Exception e) {
+            Debug.out("Spawn Exception");
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+
 }

@@ -51,6 +51,13 @@ public class Util extends BotState {
     }
 
     public static void initCenter() {
+        if(Signal.receiveSignal(Signal.CENTER) == Signal.DETECTED) {
+            float[] centerArray = Signal.receiveCoordinate(Signal.CENTER | Signal.DATA_CHANNEL_X, Signal.CENTER | Signal.DATA_CHANNEL_Y);
+            center = new MapLocation(centerArray[0], centerArray[1]);
+
+            return;
+        }
+
         int xavg = 0, yavg = 0;
 
         for (int i = 0; i < ourStartingLocations.length; i++) {
@@ -62,13 +69,15 @@ public class Util extends BotState {
         }
 
         center = new MapLocation(Math.round(xavg / (ourStartingLocations.length + enemyStartingLocations.length)), Math.round(yavg / (ourStartingLocations.length + enemyStartingLocations.length)));
+        float[] centerArray = {center.x, center.y};
+        Signal.broadcastCoordinate(Signal.CENTER | Signal.DATA_CHANNEL_X, Signal.CENTER | Signal.DATA_CHANNEL_Y, centerArray);
+        Signal.broadcastSignal(Signal.CENTER, Signal.DETECTED);
     }
 
-    // TODO : Take a closer look - make more efficient
     public static Direction getClosestBorder(){
         float west = myLocation.x - border[0];
-        float north = myLocation.y - border[1];
-        float east = myLocation.x - border[2];
+        float north = border[1] - myLocation.y;
+        float east = border[2] - myLocation.x;
         float south = myLocation.y - border[3];
 
         float closest = west;
@@ -103,7 +112,6 @@ public class Util extends BotState {
         }
     }
 
-    // TODO : Fix this after fixing closestBorder
     public static void updateBorders(){
         if(Signal.receiveSignal(Signal.BORDER) != Signal.DETECTED)
             return;
@@ -112,38 +120,45 @@ public class Util extends BotState {
 
         // WEST
         if(myLocation.x < border[0]) {
-            border[0] = myLocation.x - myBodyRadius;
-            border[2] = center.x + (center.x - border[0]);
+            float[] westEast = {0, 0};
+            westEast[0] = myLocation.x - myBodyRadius;
+            westEast[1] = center.x + (center.x - westEast[0]) + (2*myBodyRadius);
 
-            float[] horBorder = {border[0], border[2]};
-            Signal.broadcastCoordinate(Signal.DATA_CHANNEL_X | Signal.NORTH_WEST, Signal.DATA_CHANNEL_X | Signal.SOUTH_EAST, horBorder);
+            Signal.broadcastCoordinate(Signal.DATA_CHANNEL_X | Signal.NORTH_WEST, Signal.DATA_CHANNEL_X | Signal.SOUTH_EAST, westEast);
+            return;
         }
 
         // NORTH
         if(myLocation.y > border[1]){
-            border[1] = myLocation.y + myBodyRadius;
-            border[3] = center.y - (border[1] - center.y);
+            float[] northSouth = {0, 0};
 
-            float[] vertBorder = {border[1], border[3]};
-            Signal.broadcastCoordinate(Signal.DATA_CHANNEL_Y | Signal.NORTH_WEST, Signal.DATA_CHANNEL_Y | Signal.SOUTH_EAST, vertBorder);
+            northSouth[0] = myLocation.y + myBodyRadius;
+            northSouth[1] = center.y - (northSouth[1] - center.y) - (2*myBodyRadius);
+
+            Signal.broadcastCoordinate(Signal.DATA_CHANNEL_Y | Signal.NORTH_WEST, Signal.DATA_CHANNEL_Y | Signal.SOUTH_EAST, northSouth);
+            return;
         }
 
         // EAST
         if(myLocation.x > border[2]) {
-            border[2] = myLocation.x + myBodyRadius;
-            border[0] = center.x - (border[2] - center.x);
+            float[] westEast = {0, 0};
 
-            float[] horBorder = {border[0], border[2]};
-            Signal.broadcastCoordinate(Signal.DATA_CHANNEL_X | Signal.NORTH_WEST, Signal.DATA_CHANNEL_X | Signal.SOUTH_EAST, horBorder);
+            westEast[1] = myLocation.x + myBodyRadius;
+            westEast[0] = center.x - (westEast[1] - center.x) - (2*myBodyRadius);
+
+            Signal.broadcastCoordinate(Signal.DATA_CHANNEL_X | Signal.NORTH_WEST, Signal.DATA_CHANNEL_X | Signal.SOUTH_EAST, westEast);
+            return;
         }
 
         // SOUTH
         if( myLocation.y < border[3]) {
-            border[3] = myLocation.y - myBodyRadius;
-            border[1] = center.y + (center.y - border[1]);
+            float[] northSouth = {0, 0};
 
-            float[] vertBorder = {border[1], border[3]};
-            Signal.broadcastCoordinate(Signal.DATA_CHANNEL_Y | Signal.NORTH_WEST, Signal.DATA_CHANNEL_Y | Signal.SOUTH_EAST, vertBorder);
+            northSouth[1] = myLocation.y - myBodyRadius;
+            northSouth[0] = center.y + (center.y - northSouth[1]) + (2*myBodyRadius);
+
+            Signal.broadcastCoordinate(Signal.DATA_CHANNEL_Y | Signal.NORTH_WEST, Signal.DATA_CHANNEL_Y | Signal.SOUTH_EAST, northSouth);
+            return;
         }
 
         try {

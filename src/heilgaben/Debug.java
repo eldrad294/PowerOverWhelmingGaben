@@ -16,8 +16,8 @@ public class Debug extends BotState {
 
     public static void drawMapBorder() {
         MapLocation topLeft = new MapLocation(border[0], border[1]);
-        MapLocation topRight = new MapLocation(border[0], border[3]);
-        MapLocation bottomLeft = new MapLocation(border[2], border[1]);
+        MapLocation topRight = new MapLocation(border[2], border[1]);
+        MapLocation bottomLeft = new MapLocation(border[0], border[3]);
         MapLocation bottomRight = new MapLocation(border[2], border[3]);
 
         try {
