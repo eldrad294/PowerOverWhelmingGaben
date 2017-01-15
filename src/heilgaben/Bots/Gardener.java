@@ -64,11 +64,11 @@ public class Gardener extends BotState {
                     water();
                     break;
                 case TENDING_GARDEN:
-                    spawn(RobotType.SCOUT);
+                    spawn();
                     water();
                     break;
                 default:
-                    Nav.move(Nav.getMoveDirection(myLocation));
+                    idle();
                     break;
             }
         } catch (Exception e){
@@ -94,7 +94,7 @@ public class Gardener extends BotState {
         }
 
         // Act according to state
-        Nav.move(Nav.getMoveDirection(myLocation));
+        Nav.moveTo(center);
         return false;
     }
 
@@ -146,6 +146,14 @@ public class Gardener extends BotState {
         return false;
     }
 
+    private static boolean spawn(){
+//        if(Signal.isBorderDetected())
+//            spawn(RobotType.SOLDIER);
+//        else
+            spawn(RobotType.SCOUT);
+        return false;
+    }
+
     private static boolean spawn(RobotType robotType) {
         try {
             Direction spawnDirection = Util.getRobotSpawnDirection(robotType);
@@ -160,5 +168,8 @@ public class Gardener extends BotState {
         return false;
     }
 
-
+    private static boolean idle(){
+        Nav.moveTo(myLocation);
+        return false;
+    }
 }

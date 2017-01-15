@@ -57,7 +57,7 @@ public class Archon extends BotState {
             Util.updateBorders();
 
             spawn();
-            Nav.move(Nav.getMoveDirection(center));
+            Nav.moveTo(myLocation);
         } catch (Exception e){
             Debug.out("Act Exception");
             e.printStackTrace();

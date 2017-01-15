@@ -3,12 +3,15 @@ package heilgaben;
 public enum State {
     NONE,
     INIT,
+    IDLE,
 
     // SCOUT
     DETECTING_BORDER_X,
     DETECTING_BORDER_Y,
     SIGNALING_BORDERS,
-    HARASS,
+    SHAKING_TREES,
+    SCOUTING,
+    HARASSING,
 
     // GARDENER
     SEARCHING_GARDEN_SPOT,

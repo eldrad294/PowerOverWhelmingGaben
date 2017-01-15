@@ -9,6 +9,12 @@ import heilgaben.Vector;
  * Navigation Class
  */
 public class Nav extends BotState {
+
+    public static boolean moveTo(MapLocation destination){
+        Direction direction = getMoveDirection(destination);
+        return move(direction);
+    }
+
     public static boolean move(Direction moveDirection) {
         try {
             if(rc.hasMoved())
@@ -40,8 +46,10 @@ public class Nav extends BotState {
     public static Direction getMoveDirection(MapLocation destination){
         ArrayList<Vector> allDirections = new ArrayList<>();
 
-        if(destination != myLocation)
-            allDirections.add(new Vector(myLocation, destination));
+        if(destination != myLocation) {
+            Direction directionToDestination = new Direction(myLocation, destination);
+            allDirections.add(new Vector(directionToDestination, 2));
+        }
 
         ArrayList<Vector> repulsiveDirections = getRepulsiveVectors(myBodyRadius*2);
         allDirections.addAll(repulsiveDirections);
@@ -61,14 +69,20 @@ public class Nav extends BotState {
 
         for(RobotInfo robot: nearbyRobots) {
             MapLocation robotLocation = robot.getLocation();
-            if (myLocation.distanceTo(robotLocation) <= (repulsionRadius + (robot.getRadius()*2)))
+            float robotRepulsion = repulsionRadius + (robot.getRadius()*2);
+            if(myType == RobotType.GARDENER && robot.type == myType && robot.team == myTeam)
+                robotRepulsion = myType.sensorRadius;
+            if(myType == RobotType.SCOUT && robot.type == RobotType.GARDENER && robot.team == enemyTeam)
+                continue;
+            if (myLocation.distanceTo(robotLocation) <= robotRepulsion)
                 repulsionDirections.add(new Vector(robotLocation, myLocation));
         }
 
         if(myType != RobotType.SCOUT) {
             for (TreeInfo tree : nearbyTrees) {
                 MapLocation treeLocation = tree.getLocation();
-                if (myLocation.distanceTo(treeLocation) <= (repulsionRadius + (tree.getRadius() * 1)))
+                float treeRepulsion = repulsionRadius + (tree.getRadius()*1);
+                if (myLocation.distanceTo(treeLocation) <= treeRepulsion)
                     repulsionDirections.add(new Vector(treeLocation, myLocation));
             }
         }
