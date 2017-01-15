@@ -64,19 +64,32 @@ public class Gardener extends BotState {
             Map.updateBorders();
             globalState = Signal.getGlobalState();
 
-            switch(globalState) {
-                case OPENING:
-            }
             switch (state) {
                 case SEARCHING_GARDEN_SPOT:
                     search();
                     break;
                 case PLANTING_GARDEN:
-                    plant();
-                    water();
+                    switch(globalState) {
+                        case OPENING:
+                            spawn(RobotType.SCOUT);
+                            break;
+                        default:
+                            plant();
+                            water();
+                            break;
+                    }
                     break;
                 case TENDING_GARDEN:
-                    spawn();
+                    switch(globalState) {
+                        case OPENING:
+                            spawn(RobotType.SCOUT);
+                            break;
+                        case MIDGAME:
+                            spawn(RobotType.SOLDIER);
+                            break;
+                        case ENDGAME:
+                            spawn(RobotType.TANK);
+                    }
                     water();
                     break;
                 default:
