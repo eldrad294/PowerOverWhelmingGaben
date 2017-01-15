@@ -1,9 +1,12 @@
 package heilgaben.Bots;
 
 import battlecode.common.*;
+
 import heilgaben.*;
+import static heilgaben.SignalConstants.*;
 
 import java.util.ArrayList;
+
 
 public class Gardener extends BotState {
 
@@ -43,8 +46,8 @@ public class Gardener extends BotState {
      */
     private static void init() {
         try {
-            Util.initCenter();
-            Util.initBorders();
+            Map.initCenter();
+            Map.initBorders();
 
             state = State.SEARCHING_GARDEN_SPOT;
         } catch (Exception e) {
@@ -58,8 +61,12 @@ public class Gardener extends BotState {
      */
     private static void act() {
         try {
-            Util.updateBorders();
+            Map.updateBorders();
+            globalState = Signal.getGlobalState();
 
+            switch(globalState) {
+                case OPENING:
+            }
             switch (state) {
                 case SEARCHING_GARDEN_SPOT:
                     search();

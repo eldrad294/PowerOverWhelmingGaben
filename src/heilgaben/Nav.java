@@ -96,13 +96,13 @@ public class Nav extends BotState {
         }
 
         try {
-            Direction closestBorder = Util.getClosestBorder();
+            Direction closestBorder = Map.getClosestBorder();
             if (!rc.onTheMap(myLocation, repulsionRadius)) {
                 if(closestBorder.radians%Math.PI != 0) {
                     if (Signal.isBorderXDetected())
-                        repulsionDirections.add(new Vector(Util.getClosestBorder(), 1));
+                        repulsionDirections.add(new Vector(Map.getClosestBorder(), 3));
                 } else if (Signal.isBorderYDetected()) {
-                    repulsionDirections.add(new Vector(Util.getClosestBorder(), 1));
+                    repulsionDirections.add(new Vector(Map.getClosestBorder(), 3));
                 }
             }
         } catch (Exception e) {

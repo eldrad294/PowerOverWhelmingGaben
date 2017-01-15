@@ -3,6 +3,8 @@ package heilgaben.Bots;
 import battlecode.common.*;
 import heilgaben.*;
 
+import static heilgaben.SignalConstants.*;
+
 public class Scout extends BotState {
 
     /**
@@ -41,8 +43,8 @@ public class Scout extends BotState {
      */
     private static void init() {
         try {
-            Util.initCenter();
-            Util.initBorders();
+            Map.initCenter();
+            Map.initBorders();
 
             if(!Signal.isBorderDetected()) {
                 initClosestBorders();
@@ -61,7 +63,7 @@ public class Scout extends BotState {
      */
     private static void act() {
         try {
-            Util.updateBorders();
+            Map.updateBorders();
 
             switch(state){
                 case DETECTING_BORDER_X:
@@ -141,8 +143,8 @@ public class Scout extends BotState {
                 westEast[0] = center.x - (westEast[1] - center.x) - (2*myBodyRadius);
             }
 
-            Signal.broadcastCoordinate(Signal.NORTH_WEST | Signal.DATA_CHANNEL_X, Signal.SOUTH_EAST | Signal.DATA_CHANNEL_X, westEast);
-            Signal.broadcastSignal(Signal.BORDER | Signal.DATA_CHANNEL_X, Signal.DETECTED);
+            Signal.broadcastCoordinate(NORTH_WEST | DATA_CHANNEL_X, SOUTH_EAST | DATA_CHANNEL_X, westEast);
+            Signal.broadcastSignal(BORDER | DATA_CHANNEL_X, DETECTED);
         }
 
         return false;
@@ -168,8 +170,8 @@ public class Scout extends BotState {
                 northSouth[1] = center.y - (northSouth[0] - center.y) - (2*myBodyRadius);
             }
 
-            Signal.broadcastCoordinate(Signal.NORTH_WEST | Signal.DATA_CHANNEL_Y, Signal.SOUTH_EAST | Signal.DATA_CHANNEL_Y, northSouth);
-            Signal.broadcastSignal(Signal.BORDER | Signal.DATA_CHANNEL_Y, Signal.DETECTED);
+            Signal.broadcastCoordinate(NORTH_WEST | DATA_CHANNEL_Y, SOUTH_EAST | DATA_CHANNEL_Y, northSouth);
+            Signal.broadcastSignal(BORDER | DATA_CHANNEL_Y, DETECTED);
         }
 
         return false;
@@ -183,14 +185,14 @@ public class Scout extends BotState {
         }
 
         // Act according to state
-        Signal.broadcastSignal(Signal.BORDER, Signal.DETECTED);
+        Signal.broadcastSignal(BORDER, DETECTED);
         border = Signal.receiveBorders();
         return false;
     }
 
     private static boolean shake(State nextState) {
         // Init state variables
-        TreeInfo closestBulletTree = Util.getClosestNonemptyBulletTree();
+        TreeInfo closestBulletTree = Map.getClosestNonemptyBulletTree();
 
         // Check for state change
         if(closestBulletTree == null) {

@@ -3,6 +3,9 @@ package heilgaben;
 import battlecode.common.*;
 
 public class BotState {
+    /* Game Info */
+    public static int globalState = 0x000000;
+
     /* Robot Info */
     public static RobotController rc;
     public static int myID;

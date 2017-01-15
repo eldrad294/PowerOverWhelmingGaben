@@ -1,10 +1,7 @@
 package heilgaben.Bots;
 
 import battlecode.common.*;
-import heilgaben.Debug;
-import heilgaben.BotState;
-import heilgaben.Signal;
-import heilgaben.Util;
+import heilgaben.*;
 
 public class Tank extends BotState {
     public static void run() throws GameActionException {
@@ -31,8 +28,8 @@ public class Tank extends BotState {
 
     private static void init() {
         try {
-            Util.initCenter();
-            Util.initBorders();
+            Map.initCenter();
+            Map.initBorders();
         } catch (Exception e){
             Debug.out("Init Exception");
             e.printStackTrace();
@@ -41,7 +38,7 @@ public class Tank extends BotState {
 
     private static void act() {
         try {
-            Util.updateBorders();
+            Map.updateBorders();
         } catch (Exception e){
             Debug.out("Act Exception");
             e.printStackTrace();
