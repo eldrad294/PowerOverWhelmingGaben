@@ -3,11 +3,15 @@ package heilgaben.Bots;
 import battlecode.common.*;
 import heilgaben.*;
 
+import java.util.ArrayList;
+
 public class Gardener extends BotState {
 
     /**
      * BotType Specific Variables
      */
+
+    public static ArrayList<Direction> spawnDirections;
 
     /**
      * BotType specific run - called every loop
@@ -41,8 +45,9 @@ public class Gardener extends BotState {
         try {
             Util.initCenter();
             Util.initBorders();
+
             state = State.SEARCHING_GARDEN_SPOT;
-        } catch (Exception e){
+        } catch (Exception e) {
             Debug.out("Init Exception");
             e.printStackTrace();
         }
@@ -55,7 +60,7 @@ public class Gardener extends BotState {
         try {
             Util.updateBorders();
 
-            switch(state){
+            switch (state) {
                 case SEARCHING_GARDEN_SPOT:
                     search();
                     break;
@@ -71,7 +76,7 @@ public class Gardener extends BotState {
                     idle();
                     break;
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             Debug.out("Act Exception");
             e.printStackTrace();
         }
@@ -83,12 +88,14 @@ public class Gardener extends BotState {
 
     /**
      * State specific functions
+     *
      * @return true if state changed
      */
 
-    private static boolean search(){
+    private static boolean search() {
         // Check for state change
-        if(rc.senseNearbyRobots(3).length == 0 && rc.senseNearbyTrees(5).length == 0) {
+        if (rc.senseNearbyRobots(3).length == 0 && rc.senseNearbyTrees(2).length == 0) {
+            spawnDirections = Util.getSpawnableDirections(1);
             state = State.PLANTING_GARDEN;
             return true;
         }
@@ -98,21 +105,21 @@ public class Gardener extends BotState {
         return false;
     }
 
-    private static boolean plant(){
+    private static boolean plant() {
         // Check for state change
-        if(rc.senseNearbyTrees(3, myTeam).length >= 5){
+        if (rc.senseNearbyTrees(3, myTeam).length >= spawnDirections.size()-1) {
             state = State.TENDING_GARDEN;
             return true;
         }
 
         // Act according to state;
         try {
-            Direction spawnDirection = Util.getPlantDirection();
-            if(spawnDirection != null) {
+            Direction spawnDirection = getPlantDirection();
+            if (spawnDirection != null) {
                 rc.plantTree(spawnDirection);
             }
 
-        } catch (Exception e){
+        } catch (Exception e) {
             Debug.out("Plant Exception");
             e.printStackTrace();
         }
@@ -120,10 +127,10 @@ public class Gardener extends BotState {
         return false;
     }
 
-    private static boolean water(){
+    private static boolean water() {
         try {
             TreeInfo[] treesInRange = rc.senseNearbyTrees(2, myTeam);
-            if(treesInRange.length > 0) {
+            if (treesInRange.length > 0) {
                 TreeInfo lowestTree = treesInRange[0];
 
                 for (TreeInfo tree : treesInRange) {
@@ -138,7 +145,7 @@ public class Gardener extends BotState {
 
                 rc.water(lowestTree.location);
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             Debug.out("Water Exception");
             e.printStackTrace();
         }
@@ -146,18 +153,18 @@ public class Gardener extends BotState {
         return false;
     }
 
-    private static boolean spawn(){
+    private static boolean spawn() {
 //        if(Signal.isBorderDetected())
 //            spawn(RobotType.SOLDIER);
 //        else
-            spawn(RobotType.SCOUT);
+        spawn(RobotType.SCOUT);
         return false;
     }
 
     private static boolean spawn(RobotType robotType) {
         try {
             Direction spawnDirection = Util.getRobotSpawnDirection(robotType);
-            if(spawnDirection != null) {
+            if (spawnDirection != null) {
                 rc.buildRobot(robotType, spawnDirection);
             }
         } catch (Exception e) {
@@ -168,8 +175,29 @@ public class Gardener extends BotState {
         return false;
     }
 
-    private static boolean idle(){
+    private static boolean idle() {
         Nav.moveTo(myLocation);
         return false;
+    }
+
+    /**
+     * Helper Functions
+     *
+     * @return
+     */
+    private static Direction getPlantDirection() {
+        ArrayList<Direction> spawnDirections = Util.getSpawnableDirections(1);
+
+        try {
+            for (Direction spawnDirection : spawnDirections) {
+                if (rc.canPlantTree(spawnDirection))
+                    return spawnDirection;
+            }
+        } catch (Exception e) {
+            Debug.out("Get Spawn Direction Exception");
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

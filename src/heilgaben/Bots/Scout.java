@@ -188,23 +188,16 @@ public class Scout extends BotState {
     }
 
     private static boolean shake(State nextState) {
-        //Check for state change
-        if(nearbyTrees.length == 0) {
+        // Init state variables
+        TreeInfo closestBulletTree = Util.getClosestNonemptyBulletTree();
+
+        // Check for state change
+        if(closestBulletTree == null) {
             state = nextState;
             return true;
         }
 
         // Act according to state
-        TreeInfo closestBulletTree = null;
-        for(TreeInfo tree : nearbyTrees){
-            if(tree.getContainedBullets() > 0)
-                if(closestBulletTree == null || myLocation.distanceTo(tree.location) < myLocation.distanceTo(closestBulletTree.location))
-                    closestBulletTree = tree;
-        }
-
-        if(closestBulletTree == null)
-            return false;
-
         try {
             rc.setIndicatorLine(myLocation, closestBulletTree.location, 255, 255, 255);
             if (rc.canShake(closestBulletTree.location)) {
@@ -255,8 +248,10 @@ public class Scout extends BotState {
             MapLocation enemyLocation = closestEnemy.location;
             if (closestEnemy.getType() == RobotType.GARDENER && !enemyLocation.isWithinDistance(myLocation, 2))
                 Nav.moveTo(enemyLocation);
-            else if (rc.canFireSingleShot())
+            else if (rc.canFireSingleShot()) {
                 rc.fireSingleShot(new Direction(myLocation, enemyLocation));
+                Nav.moveTo(myLocation);
+            }
         } catch (Exception e) {
             Debug.out("Harass Exception");
             e.printStackTrace();
