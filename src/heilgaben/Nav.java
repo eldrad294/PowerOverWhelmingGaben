@@ -3,6 +3,7 @@ package heilgaben;
 import battlecode.common.*;
 
 import java.util.ArrayList;
+import heilgaben.Vector;
 
 /**
  * Navigation Class
@@ -37,54 +38,56 @@ public class Nav extends BotState {
     }
 
     public static Direction getMoveDirection(MapLocation destination){
-        ArrayList<Direction> allDirections = new ArrayList<>();
+        ArrayList<Vector> allDirections = new ArrayList<>();
 
         if(destination != myLocation)
-            allDirections.add(new Direction(myLocation, destination));
+            allDirections.add(new Vector(myLocation, destination));
 
-        // TODO : Use vectors with magnitude instead of Directions
-        ArrayList<Direction> repulsiveDirections = getRepulsiveDirections(myBodyRadius*2);
+        ArrayList<Vector> repulsiveDirections = getRepulsiveVectors(myBodyRadius*2);
         allDirections.addAll(repulsiveDirections);
 
 //        ArrayList<Direction> attractiveDirections = getAttractiveDirections(myBodyRadius*2);
 //        allDirections.addAll(attractiveDirections);
 
 
-        return computeResultantDirection(allDirections);
+        Vector resultant = computeResultantVector(allDirections);
+        if(resultant != null)
+            return resultant.direction;
+        return null;
     }
 
-    public static ArrayList<Direction> getRepulsiveDirections(float repulsionRadius){
-        ArrayList<Direction> repulsionDirections = new ArrayList<>();
+    public static ArrayList<Vector> getRepulsiveVectors(float repulsionRadius){
+        ArrayList<Vector> repulsionDirections = new ArrayList<>();
 
         for(RobotInfo robot: nearbyRobots) {
             MapLocation robotLocation = robot.getLocation();
             if (myLocation.distanceTo(robotLocation) <= (repulsionRadius + (robot.getRadius()*2)))
-                repulsionDirections.add(new Direction(robotLocation, myLocation));
+                repulsionDirections.add(new Vector(robotLocation, myLocation));
         }
 
         if(myType != RobotType.SCOUT) {
             for (TreeInfo tree : nearbyTrees) {
                 MapLocation treeLocation = tree.getLocation();
                 if (myLocation.distanceTo(treeLocation) <= (repulsionRadius + (tree.getRadius() * 1)))
-                    repulsionDirections.add(new Direction(treeLocation, myLocation));
+                    repulsionDirections.add(new Vector(treeLocation, myLocation));
             }
         }
 
         for(BulletInfo bullet: nearbyBullets) {
             MapLocation bulletLocation = bullet.getLocation();
             if(willCollideWithMe(bullet)) {
-                repulsionDirections.add(new Direction(bulletLocation, myLocation).rotateLeftDegrees(90));
+                repulsionDirections.add(new Vector(bulletLocation, myLocation).rotateLeftDegrees(90));
             }
         }
 
         try {
             Direction closestBorder = Util.getClosestBorder();
-            if (!rc.onTheMap(myLocation, myBodyRadius + 2)) {
+            if (!rc.onTheMap(myLocation, repulsionRadius)) {
                 if(closestBorder.radians%Math.PI != 0) {
                     if (Signal.isBorderXDetected())
-                        repulsionDirections.add(Util.getClosestBorder());
+                        repulsionDirections.add(new Vector(Util.getClosestBorder(), 1));
                 } else if (Signal.isBorderYDetected()) {
-                    repulsionDirections.add(Util.getClosestBorder());
+                    repulsionDirections.add(new Vector(Util.getClosestBorder(), 1));
                 }
             }
         } catch (Exception e) {
@@ -113,20 +116,20 @@ public class Nav extends BotState {
         return attractionDirections;
     }
 
-    public static Direction computeResultantDirection(ArrayList<Direction> directionList){
-        if(directionList.size() == 0)
+    public static Vector computeResultantVector(ArrayList<Vector> vectorList){
+        if(vectorList.size() == 0)
             return null;
 
-        Direction result = directionList.get(0);
-        directionList.remove(0);
+        Vector result = vectorList.get(0);
+        vectorList.remove(0);
 
-        for(Direction direction: directionList){
-            float x1 = result.getDeltaX(1);
-            float y1 = result.getDeltaY(1);
-            float x2 = direction.getDeltaX(1);
-            float y2 = direction.getDeltaY(1);
+        for(Vector v: vectorList){
+            float x1 = result.getDeltaX();
+            float y1 = result.getDeltaY();
+            float x2 = v.getDeltaX();
+            float y2 = v.getDeltaY();
 
-            result = new Direction((x1 + x2), (y1 + y2));
+            result = new Vector((x1 + x2), (y1 + y2));
         }
 
         return result;
@@ -163,65 +166,6 @@ public class Nav extends BotState {
         float perpendicularDist = (float)Math.abs(distToRobot * Math.sin(theta)); // soh cah toa :)
 
         return (perpendicularDist <= rc.getType().bodyRadius);
-    }
-
-    /**
-     * Returns a random Direction
-     * @return a random Direction
-     */
-    static Direction randomDirection() {
-        return new Direction((float)Math.random() * 2 * (float)Math.PI);
-    }
-
-    /**
-     * Attempts to move in a given direction, while avoiding small obstacles directly in the path.
-     *
-     * @param dir The intended direction of movement
-     * @return true if a move was performed
-     * @throws GameActionException
-     */
-    static boolean tryMove(Direction dir) throws GameActionException {
-        return tryMove(dir,20,3);
-    }
-
-    /**
-     * Attempts to move in a given direction, while avoiding small obstacles direction in the path.
-     *
-     * @param dir The intended direction of movement
-     * @param degreeOffset Spacing between checked directions (degrees)
-     * @param checksPerSide Number of extra directions checked on each side, if intended direction was unavailable
-     * @return true if a move was performed
-     * @throws GameActionException
-     */
-    static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
-
-        // First, try intended direction
-        if (rc.canMove(dir)) {
-            rc.move(dir);
-            return true;
-        }
-
-        // Now try a bunch of similar angles
-        boolean moved = false;
-        int currentCheck = 1;
-
-        while(currentCheck<=checksPerSide) {
-            // Try the offset of the left side
-            if(rc.canMove(dir.rotateLeftDegrees(degreeOffset*currentCheck))) {
-                rc.move(dir.rotateLeftDegrees(degreeOffset*currentCheck));
-                return true;
-            }
-            // Try the offset on the right side
-            if(rc.canMove(dir.rotateRightDegrees(degreeOffset*currentCheck))) {
-                rc.move(dir.rotateRightDegrees(degreeOffset*currentCheck));
-                return true;
-            }
-            // No move performed, try slightly further
-            currentCheck++;
-        }
-
-        // A move never happened, so return false.
-        return false;
     }
 
     public static float getMaxMoveDistance(Direction direction){

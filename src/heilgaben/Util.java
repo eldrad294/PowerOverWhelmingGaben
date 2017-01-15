@@ -89,7 +89,7 @@ public class Util extends BotState {
         }
 
         try {
-            rc.setIndicatorLine(myLocation, myLocation.add(direction, closest), 255, 255, 0);
+            //rc.setIndicatorLine(myLocation, myLocation.add(direction, closest), 255, 255, 0);
         } catch (Exception e){
 
         }
@@ -155,4 +155,7 @@ public class Util extends BotState {
         }
     }
 
+    public static float getDistance(MapLocation v1, MapLocation v2){
+        return (float)Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2));
+    }
 }
