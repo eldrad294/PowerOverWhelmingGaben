@@ -9,6 +9,7 @@ public class Scout extends BotState {
      * BotType Specific Variables
      */
     private static Direction[] closestBorderDirection = new Direction[2];
+    private static int scoutCount = 0;
 
     /**
      * BotType specific run - called every loop
@@ -221,8 +222,11 @@ public class Scout extends BotState {
         }
 
         // Act according to state
-        for(MapLocation scoutLocation: enemyStartingLocations)
-            Nav.moveTo(scoutLocation);
+        MapLocation scoutLocation = enemyStartingLocations[scoutCount%enemyStartingLocations.length];
+        if(scoutLocation.isWithinDistance(myLocation, myRobotSightRadius))
+            scoutCount++;
+
+        Nav.moveTo(scoutLocation);
 
         return false;
     }
@@ -246,12 +250,17 @@ public class Scout extends BotState {
 
         try {
             MapLocation enemyLocation = closestEnemy.location;
-            if (closestEnemy.getType() == RobotType.GARDENER && !enemyLocation.isWithinDistance(myLocation, 2))
-                Nav.moveTo(enemyLocation);
-            else if (rc.canFireSingleShot()) {
+            if (rc.canFireSingleShot()) {
                 rc.fireSingleShot(new Direction(myLocation, enemyLocation));
+            }
+
+            if (closestEnemy.getType() == RobotType.GARDENER && !enemyLocation.isWithinDistance(myLocation, 2)) {
+                Nav.moveTo(enemyLocation);
+            }
+            else {
                 Nav.moveTo(myLocation);
             }
+
         } catch (Exception e) {
             Debug.out("Harass Exception");
             e.printStackTrace();

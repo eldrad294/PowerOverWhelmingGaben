@@ -90,8 +90,9 @@ public class Nav extends BotState {
         for(BulletInfo bullet: nearbyBullets) {
             MapLocation bulletLocation = bullet.getLocation();
             if(willCollideWithMe(bullet)) {
-                repulsionDirections.add(new Vector(bulletLocation, myLocation).rotateLeftDegrees(90));
-            }
+                repulsionDirections.add(new Vector(new Direction(bulletLocation, myLocation).rotateLeftDegrees(90), 3));
+            } else
+                repulsionDirections.add(new Vector(new Direction(bulletLocation, myLocation), 0.25f));
         }
 
         try {

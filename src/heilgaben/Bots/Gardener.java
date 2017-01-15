@@ -112,6 +112,8 @@ public class Gardener extends BotState {
             return true;
         }
 
+        Debug.out("Spawn Directions: " + spawnDirections.size());
+        Debug.out("Nearby Trees: " + rc.senseNearbyTrees(3, myTeam).length);
         // Act according to state;
         try {
             Direction spawnDirection = getPlantDirection();
@@ -186,8 +188,6 @@ public class Gardener extends BotState {
      * @return
      */
     private static Direction getPlantDirection() {
-        ArrayList<Direction> spawnDirections = Util.getSpawnableDirections(1);
-
         try {
             for (Direction spawnDirection : spawnDirections) {
                 if (rc.canPlantTree(spawnDirection))

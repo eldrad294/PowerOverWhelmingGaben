@@ -40,14 +40,15 @@ public class Util extends BotState {
         ArrayList<Direction> spawnableDirections = new ArrayList<>();
 
         try {
-            for (float radians = 0; radians < Math.PI * 2; radians += interval) {
+            for (float radians = 0; radians < ((Math.PI * 2) - interval); radians += interval) {
                 Direction spawnDirection = new Direction(radians);
-                if (!rc.isCircleOccupied(myLocation.add(spawnDirection, myBodyRadius + 1), spawnObjectRadius)) {
+                rc.setIndicatorDot(myLocation.add(spawnDirection, myBodyRadius + 1), 255, 255, 255);
+                if (!rc.isCircleOccupied(myLocation.add(spawnDirection, myBodyRadius + 1), spawnObjectRadius - 0.5f)) {
                     spawnableDirections.add(spawnDirection);
                 }
             }
         } catch (Exception e) {
-            Debug.out("Spawnable Directions ExceptioN");
+            Debug.out("Spawnable Directions Exception");
             e.printStackTrace();
         }
 
