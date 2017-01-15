@@ -6,7 +6,14 @@ import heilgaben.*;
 
 public class Archon extends BotState {
 
-    public static void run() throws GameActionException {
+    /**
+     * BotType specific variables
+     */
+
+    /**
+     * BotType specific run - called every loop
+     */
+    public static void run() {
 
         /* Archon specific init */
         init();
@@ -29,6 +36,9 @@ public class Archon extends BotState {
         }
     }
 
+    /**
+     * BotType specific initialisation
+     */
     private static void init() {
         try {
             Util.initCenter();
@@ -39,6 +49,9 @@ public class Archon extends BotState {
         }
     }
 
+    /**
+     * Bot state machine
+     */
     private static void act() {
         try {
             Util.updateBorders();
@@ -50,6 +63,15 @@ public class Archon extends BotState {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Initialisation functions
+     */
+
+    /**
+     * State specific functions
+     * @return true if state changed
+     */
 
     private static boolean spawn() {
         try {

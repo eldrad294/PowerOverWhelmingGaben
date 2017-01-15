@@ -5,9 +5,15 @@ import heilgaben.*;
 
 public class Scout extends BotState {
 
-    static Direction[] closestBorderDirection = new Direction[2];
+    /**
+     * BotType Specific Variables
+     */
+    private static Direction[] closestBorderDirection = new Direction[2];
 
-    public static void run() throws GameActionException {
+    /**
+     * BotType specific run - called every loop
+     */
+    public static void run() {
         /* Scout specific init */
         init();
 
@@ -29,6 +35,9 @@ public class Scout extends BotState {
         }
     }
 
+    /**
+     * BotType specific initialisation
+     */
     private static void init() {
         try {
             Util.initCenter();
@@ -46,6 +55,9 @@ public class Scout extends BotState {
         }
     }
 
+    /**
+     * Bot state machine
+     */
     private static void act() {
         try {
             Util.updateBorders();
@@ -72,6 +84,10 @@ public class Scout extends BotState {
         }
     }
 
+    /**
+     * Initialisation functions
+     */
+
     private static void initClosestBorders() {
         Direction closestX;
         Direction closestY;
@@ -88,6 +104,11 @@ public class Scout extends BotState {
         closestBorderDirection[0] = closestX;
         closestBorderDirection[1] = closestY;
     }
+
+    /**
+     * State specific functions
+     * @return true if state changed
+     */
 
     private static boolean detectBorderX(){
         // Check for state change
@@ -111,7 +132,6 @@ public class Scout extends BotState {
 
             Signal.broadcastCoordinate(Signal.NORTH_WEST | Signal.DATA_CHANNEL_X, Signal.SOUTH_EAST | Signal.DATA_CHANNEL_X, westEast);
             Signal.broadcastSignal(Signal.BORDER | Signal.DATA_CHANNEL_X, Signal.DETECTED);
-            return true;
         }
 
         return false;
@@ -126,7 +146,6 @@ public class Scout extends BotState {
 
         // Act according to state;
         Direction borderDirection = closestBorderDirection[1];
-        Debug.out("Border direction: " + borderDirection.radians);
 
         if(!Nav.move(Nav.getMoveDirection(myLocation.add(borderDirection)))) {
             float[] northSouth = {0, 0};
@@ -140,7 +159,6 @@ public class Scout extends BotState {
 
             Signal.broadcastCoordinate(Signal.NORTH_WEST | Signal.DATA_CHANNEL_Y, Signal.SOUTH_EAST | Signal.DATA_CHANNEL_Y, northSouth);
             Signal.broadcastSignal(Signal.BORDER | Signal.DATA_CHANNEL_Y, Signal.DETECTED);
-            return true;
         }
 
         return false;
@@ -156,8 +174,6 @@ public class Scout extends BotState {
         // Act according to state
         Signal.broadcastSignal(Signal.BORDER, Signal.DETECTED);
         border = Signal.receiveBorders();
-        Debug.out(border[0], border[1]);
-        Debug.out(border[2], border[3]);
-        return true;
+        return false;
     }
 }

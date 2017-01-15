@@ -7,6 +7,14 @@ import heilgaben.Signal;
 import heilgaben.Util;
 
 public class Soldier extends BotState {
+
+    /**
+     * BotType Specific Variables
+     */
+
+    /**
+     * BotType specific run - called every loop
+     */
     public static void run() throws GameActionException {
         /* Soldier specific init */
         init();
@@ -29,6 +37,9 @@ public class Soldier extends BotState {
         }
     }
 
+    /**
+     * BotType specific initialisation
+     */
     private static void init() {
         try {
             Util.initCenter();
@@ -39,6 +50,9 @@ public class Soldier extends BotState {
         }
     }
 
+    /**
+     * Bot state machine
+     */
     private static void act() {
         try {
             Util.updateBorders();
@@ -47,4 +61,14 @@ public class Soldier extends BotState {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Initialisation functions
+     */
+
+    /**
+     * State specific functions
+     * @return true if state changed
+     */
+
 }

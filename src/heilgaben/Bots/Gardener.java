@@ -4,6 +4,14 @@ import battlecode.common.*;
 import heilgaben.*;
 
 public class Gardener extends BotState {
+
+    /**
+     * BotType Specific Variables
+     */
+
+    /**
+     * BotType specific run - called every loop
+     */
     public static void run() throws GameActionException {
         /* Gardener specific init */
         init();
@@ -26,6 +34,9 @@ public class Gardener extends BotState {
         }
     }
 
+    /**
+     * BotType specific initialisation
+     */
     private static void init() {
         try {
             Util.initCenter();
@@ -37,6 +48,9 @@ public class Gardener extends BotState {
         }
     }
 
+    /**
+     * Bot state machine
+     */
     private static void act() {
         try {
             Util.updateBorders();
@@ -63,6 +77,15 @@ public class Gardener extends BotState {
         }
     }
 
+    /**
+     * Initialisation functions
+     */
+
+    /**
+     * State specific functions
+     * @return true if state changed
+     */
+
     private static boolean search(){
         // Check for state change
         if(rc.senseNearbyRobots(3).length == 0 && rc.senseNearbyTrees(5).length == 0) {
@@ -85,12 +108,8 @@ public class Gardener extends BotState {
         // Act according to state;
         try {
             Direction spawnDirection = Util.getPlantDirection();
-            if(spawnDirection == null)
-                return false;
-
-            if(rc.canPlantTree(spawnDirection)) {
+            if(spawnDirection != null) {
                 rc.plantTree(spawnDirection);
-                return true;
             }
 
         } catch (Exception e){
@@ -116,8 +135,8 @@ public class Gardener extends BotState {
                             }
                         }
                 }
+
                 rc.water(lowestTree.location);
-                return true;
             }
         } catch (Exception e){
             Debug.out("Water Exception");
@@ -132,7 +151,6 @@ public class Gardener extends BotState {
             Direction spawnDirection = Util.getRobotSpawnDirection(robotType);
             if(spawnDirection != null) {
                 rc.buildRobot(robotType, spawnDirection);
-                return true;
             }
         } catch (Exception e) {
             Debug.out("Spawn Exception");
