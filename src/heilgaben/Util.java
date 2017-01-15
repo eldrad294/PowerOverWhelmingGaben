@@ -89,7 +89,7 @@ public class Util extends BotState {
         }
 
         try {
-            rc.setIndicatorLine(myLocation, myLocation.add(direction), 255, 255, 0);
+            rc.setIndicatorLine(myLocation, myLocation.add(direction, closest), 255, 255, 0);
         } catch (Exception e){
 
         }
@@ -108,36 +108,51 @@ public class Util extends BotState {
         if(Signal.receiveSignal(Signal.BORDER) != Signal.DETECTED)
             return;
 
-//        border = Signal.receiveBorders();
-//
-//        if((int) myLocation.x < border[0]) {
-//            border[0] = (int) Math.floor(myLocation.x + myBodyRadius);
-//            Signal.broadcastSignal(Signal.DATA_CHANNEL_X | Signal.NORTH_WEST, border[0]);
-//        }
-//
-//        if((int) myLocation.y < border[1]) {
-//            border[1] = (int) Math.floor(myLocation.y - myBodyRadius);
-//            Signal.broadcastSignal(Signal.DATA_CHANNEL_Y | Signal.NORTH_WEST, border[1]);
-//        }
-//
-//        if((int) myLocation.x > border[2]) {
-//            border[2] = (int) Math.floor(myLocation.x - myBodyRadius);
-//            Signal.broadcastSignal(Signal.DATA_CHANNEL_X | Signal.SOUTH_EAST, border[2]);
-//        }
-//
-//
-//        if((int) myLocation.y > border[3]) {
-//            border[3] = (int) Math.floor(myLocation.y + myBodyRadius);
-//            Signal.broadcastSignal(Signal.DATA_CHANNEL_Y | Signal.SOUTH_EAST, border[3]);
-//        }
-//
-//        try {
-//            rc.setIndicatorDot(new MapLocation(border[0], border[1]), 255, 255, 0);
-//            rc.setIndicatorDot(new MapLocation(border[2], border[3]), 255, 255, 0);
-//        } catch (Exception e){
-//            Debug.out("Indicator Dot Exception: (" + border[0] + ", " + border[1] + ") - (" + border[2] + ", " + border[3] + ")");
-//            e.printStackTrace();
-//        }
+        border = Signal.receiveBorders();
+
+        // WEST
+        if(myLocation.x < border[0]) {
+            border[0] = myLocation.x - myBodyRadius;
+            border[2] = center.x + (center.x - border[0]);
+
+            float[] horBorder = {border[0], border[2]};
+            Signal.broadcastCoordinate(Signal.DATA_CHANNEL_X | Signal.NORTH_WEST, Signal.DATA_CHANNEL_X | Signal.SOUTH_EAST, horBorder);
+        }
+
+        // NORTH
+        if(myLocation.y > border[1]){
+            border[1] = myLocation.y + myBodyRadius;
+            border[3] = center.y - (border[1] - center.y);
+
+            float[] vertBorder = {border[1], border[3]};
+            Signal.broadcastCoordinate(Signal.DATA_CHANNEL_Y | Signal.NORTH_WEST, Signal.DATA_CHANNEL_Y | Signal.SOUTH_EAST, vertBorder);
+        }
+
+        // EAST
+        if(myLocation.x > border[2]) {
+            border[2] = myLocation.x + myBodyRadius;
+            border[0] = center.x - (border[2] - center.x);
+
+            float[] horBorder = {border[0], border[2]};
+            Signal.broadcastCoordinate(Signal.DATA_CHANNEL_X | Signal.NORTH_WEST, Signal.DATA_CHANNEL_X | Signal.SOUTH_EAST, horBorder);
+        }
+
+        // SOUTH
+        if( myLocation.y < border[3]) {
+            border[3] = myLocation.y - myBodyRadius;
+            border[1] = center.y + (center.y - border[1]);
+
+            float[] vertBorder = {border[1], border[3]};
+            Signal.broadcastCoordinate(Signal.DATA_CHANNEL_Y | Signal.NORTH_WEST, Signal.DATA_CHANNEL_Y | Signal.SOUTH_EAST, vertBorder);
+        }
+
+        try {
+            rc.setIndicatorDot(new MapLocation(border[0], border[1]), 255, 255, 0);
+            rc.setIndicatorDot(new MapLocation(border[2], border[3]), 255, 255, 0);
+        } catch (Exception e){
+            Debug.out("Indicator Dot Exception: (" + border[0] + ", " + border[1] + ") - (" + border[2] + ", " + border[3] + ")");
+            e.printStackTrace();
+        }
     }
 
 }

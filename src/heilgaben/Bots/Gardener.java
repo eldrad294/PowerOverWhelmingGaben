@@ -39,7 +39,8 @@ public class Gardener extends BotState {
     private static void act() {
         try {
             Util.updateBorders();
-            if(rc.senseNearbyRobots(5).length == 0 && rc.senseNearbyTrees(5).length == 0)
+
+            if(rc.senseNearbyRobots(3).length == 0 && rc.senseNearbyTrees(5).length == 0)
                 state = State.PLANTING_GARDEN;
 
             if(state != State.PLANTING_GARDEN) {

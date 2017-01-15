@@ -97,4 +97,16 @@ public class Signal extends BotState {
         float[] borders = {northWest[0], northWest[1], southEast[0], southEast[1]};
         return borders;
     }
+
+    public static boolean isBorderDetected(){
+        return Signal.receiveSignal(Signal.BORDER) == Signal.DETECTED;
+    }
+
+    public static boolean isBorderXDetected(){
+        return Signal.receiveSignal(Signal.BORDER | Signal.DATA_CHANNEL_X) == Signal.DETECTED;
+    }
+
+    public static boolean isBorderYDetected(){
+        return Signal.receiveSignal(Signal.BORDER | Signal.DATA_CHANNEL_Y) == Signal.DETECTED;
+    }
 }

@@ -49,6 +49,7 @@ public class Nav extends BotState {
 //        ArrayList<Direction> attractiveDirections = getAttractiveDirections(myBodyRadius*2);
 //        allDirections.addAll(attractiveDirections);
 
+
         return computeResultantDirection(allDirections);
     }
 
@@ -76,15 +77,19 @@ public class Nav extends BotState {
             }
         }
 
-        if(state != State.DETECTING_BORDER_Y && state != State.DETECTING_BORDER_X && Signal.receiveSignal(Signal.BORDER) == Signal.DETECTED) {
-            try {
-                if (!rc.onTheMap(myLocation, myBodyRadius + 2)) {
+        try {
+            Direction closestBorder = Util.getClosestBorder();
+            if (!rc.onTheMap(myLocation, myBodyRadius + 2)) {
+                if(closestBorder.radians%Math.PI != 0) {
+                    if (Signal.isBorderXDetected())
+                        repulsionDirections.add(Util.getClosestBorder());
+                } else if (Signal.isBorderYDetected()) {
                     repulsionDirections.add(Util.getClosestBorder());
                 }
-            } catch (Exception e) {
-                Debug.out("Get Repulsive Directions Exception");
-                e.printStackTrace();
             }
+        } catch (Exception e) {
+            Debug.out("Get Repulsive Directions Exception");
+            e.printStackTrace();
         }
 
         return repulsionDirections;
