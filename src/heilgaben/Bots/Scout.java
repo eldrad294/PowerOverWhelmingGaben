@@ -2,6 +2,7 @@ package heilgaben.Bots;
 
 import battlecode.common.*;
 import heilgaben.*;
+import heilgaben.Actions.*;
 
 import static heilgaben.SignalConstants.*;
 
@@ -11,7 +12,31 @@ public class Scout extends BotState {
      * BotType Specific Variables
      */
     private static Direction[] closestBorderDirection = new Direction[2];
-    private static int scoutCount = 0;
+
+    /**
+     * State Transitions
+     */
+    private static ConditionState[] detectBorderXTransitions = {
+            new ConditionState(() -> Signal.isBorderXDetected(), State.DETECTING_BORDER_Y)
+    };
+    private static ConditionState[] detectBorderYTransitions = {
+            new ConditionState(() -> Signal.isBorderYDetected(), State.SIGNALING_BORDERS)
+    };
+    private static ConditionState[] signalBordersTransitions = {
+            new ConditionState(() -> Signal.isBorderDetected(), State.SHAKING_TREES)
+    };
+    private static ConditionState[] shakeTransitions = {
+            new ConditionState(() -> Map.getClosestNonemptyBulletTree() == null, State.SCOUTING)
+    };
+    private static ConditionState[] scoutTransitions = {
+            new ConditionState(() -> nearbyEnemies.length > 0, State.HARASSING)
+    };
+    private static ConditionState[] harassTransitions = {
+            new ConditionState(() -> nearbyEnemies.length == 0, State.SCOUTING)
+    };
+    private static ConditionState[] idleTransitions = {
+            new ConditionState(() -> nearbyEnemies.length > 0, State.HARASSING)
+    };
 
     /**
      * BotType specific run - called every loop
@@ -67,25 +92,25 @@ public class Scout extends BotState {
 
             switch(state){
                 case DETECTING_BORDER_X:
-                    detectBorderX(State.DETECTING_BORDER_Y);
+                    Action.detectBorderX(detectBorderXTransitions, closestBorderDirection[0]);
                     break;
                 case DETECTING_BORDER_Y:
-                    detectBorderY(State.SIGNALING_BORDERS);
+                    Action.detectBorderY(detectBorderYTransitions, closestBorderDirection[1]);
                     break;
                 case SIGNALING_BORDERS:
-                    signalBorders(State.SHAKING_TREES);
+                    Action.signalBorders(signalBordersTransitions);
                 case SHAKING_TREES:
-                    shake(State.HARASSING);
+                    Action.shake(shakeTransitions);
                     break;
                 case SCOUTING:
-                    scout(State.HARASSING);
+                    Action.scout(scoutTransitions);
                     break;
                 case HARASSING:
-                    harass(State.SCOUTING);
+                    Action.harass(harassTransitions);
                     break;
                 case IDLE:
                 default:
-                    idle();
+                    Action.idle(idleTransitions);
                     break;
             }
 
@@ -116,163 +141,5 @@ public class Scout extends BotState {
 
         closestBorderDirection[0] = closestX;
         closestBorderDirection[1] = closestY;
-    }
-
-    /**
-     * State specific functions
-     * @return true if state changed
-     */
-
-    private static boolean detectBorderX(State nextState){
-        // Check for state change
-        if(Signal.isBorderXDetected()) {
-            state = nextState;
-            return true;
-        }
-
-        // Act according to state;
-        Direction borderDirection = closestBorderDirection[0];
-
-        if(!Nav.moveTo(myLocation.add(borderDirection))) {
-            float[] westEast = {0, 0};
-            if (borderDirection.radians == Direction.getWest().radians) {
-                westEast[0] = myLocation.x - myBodyRadius;
-                westEast[1] = center.x + (center.x - westEast[0]) + (2*myBodyRadius);
-            } else {
-                westEast[1] = myLocation.x + myBodyRadius;
-                westEast[0] = center.x - (westEast[1] - center.x) - (2*myBodyRadius);
-            }
-
-            Signal.broadcastCoordinate(NORTH_WEST | DATA_CHANNEL_X, SOUTH_EAST | DATA_CHANNEL_X, westEast);
-            Signal.broadcastSignal(BORDER | DATA_CHANNEL_X, DETECTED);
-        }
-
-        return false;
-    }
-
-    private static boolean detectBorderY(State nextState) {
-        // Check for state change
-        if(Signal.isBorderYDetected()) {
-            state = nextState;
-            return true;
-        }
-
-        // Act according to state;
-        Direction borderDirection = closestBorderDirection[1];
-
-        if(!Nav.moveTo(myLocation.add(borderDirection))) {
-            float[] northSouth = {0, 0};
-            if (borderDirection.radians == Direction.getSouth().radians) {
-                northSouth[1] = myLocation.y - myBodyRadius;
-                northSouth[0] = center.y + (center.y - northSouth[1]) + (2*myBodyRadius);
-            } else {
-                northSouth[0] = myLocation.y + myBodyRadius;
-                northSouth[1] = center.y - (northSouth[0] - center.y) - (2*myBodyRadius);
-            }
-
-            Signal.broadcastCoordinate(NORTH_WEST | DATA_CHANNEL_Y, SOUTH_EAST | DATA_CHANNEL_Y, northSouth);
-            Signal.broadcastSignal(BORDER | DATA_CHANNEL_Y, DETECTED);
-        }
-
-        return false;
-    }
-
-    private static boolean signalBorders(State nextState) {
-        // Check for state change
-        if(Signal.isBorderDetected()) {
-            state = nextState;
-            return true;
-        }
-
-        // Act according to state
-        Signal.broadcastSignal(BORDER, DETECTED);
-        border = Signal.receiveBorders();
-        return false;
-    }
-
-    private static boolean shake(State nextState) {
-        // Init state variables
-        TreeInfo closestBulletTree = Map.getClosestNonemptyBulletTree();
-
-        // Check for state change
-        if(closestBulletTree == null) {
-            state = nextState;
-            return true;
-        }
-
-        // Act according to state
-        try {
-            rc.setIndicatorLine(myLocation, closestBulletTree.location, 255, 255, 255);
-            if (rc.canShake(closestBulletTree.location)) {
-                rc.shake(closestBulletTree.location);
-            } else {
-                Nav.moveTo(closestBulletTree.location);
-            }
-        } catch (Exception e){
-            Debug.out("Shake Exception");
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    private static boolean scout(State nextState){
-        // Check for state change
-        if(nearbyEnemies.length > 0) {
-            state = nextState;
-            return true;
-        }
-
-        // Act according to state
-        MapLocation scoutLocation = enemyStartingLocations[scoutCount%enemyStartingLocations.length];
-        if(scoutLocation.isWithinDistance(myLocation, myRobotSightRadius))
-            scoutCount++;
-
-        Nav.moveTo(scoutLocation);
-
-        return false;
-    }
-
-    private static boolean harass(State nextState){
-        // Check for state change
-        if(nearbyEnemies.length == 0) {
-            state = nextState;
-            return true;
-        }
-
-        // Act according to state
-        RobotInfo closestEnemy = null;
-        for (RobotInfo enemy : nearbyEnemies) {
-            if(closestEnemy == null || myLocation.distanceTo(enemy.location) < myLocation.distanceTo(closestEnemy.location))
-                closestEnemy = enemy;
-        }
-
-        if(closestEnemy == null)
-            return false;
-
-        try {
-            MapLocation enemyLocation = closestEnemy.location;
-            if (rc.canFireSingleShot()) {
-                rc.fireSingleShot(new Direction(myLocation, enemyLocation));
-            }
-
-            if (closestEnemy.getType() == RobotType.GARDENER && !enemyLocation.isWithinDistance(myLocation, 2)) {
-                Nav.moveTo(enemyLocation);
-            }
-            else {
-                Nav.moveTo(myLocation);
-            }
-
-        } catch (Exception e) {
-            Debug.out("Harass Exception");
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    private static boolean idle(){
-        Nav.moveTo(myLocation);
-        return false;
     }
 }

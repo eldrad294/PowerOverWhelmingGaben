@@ -1,7 +1,13 @@
 package heilgaben.Actions;
 
-/**
- * Created by Alarak on 16/01/2017.
- */
+import heilgaben.State;
+
 public class ConditionState {
+    public Condition condition;
+    public State nextState;
+
+    public ConditionState(Condition condition, State state){
+        this.condition = condition;
+        this.nextState = state;
+    }
 }

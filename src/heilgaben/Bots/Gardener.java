@@ -3,6 +3,8 @@ package heilgaben.Bots;
 import battlecode.common.*;
 
 import heilgaben.*;
+import heilgaben.Actions.*;
+
 import static heilgaben.SignalConstants.*;
 
 import java.util.ArrayList;
@@ -15,6 +17,24 @@ public class Gardener extends BotState {
      */
 
     public static ArrayList<Direction> spawnDirections;
+
+    /**
+     * State Transitions
+     */
+    private static ConditionState[] searchTransitions = {
+            new ConditionState(() -> rc.senseNearbyRobots(3).length == 0 && rc.senseNearbyTrees(3).length == 0, State.PLANTING_GARDEN)
+    };
+    private static ConditionState[] plantTransitions = {
+            new ConditionState(() -> rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0, State.CLEARING_FOREST),
+            new ConditionState(() -> rc.senseNearbyTrees(3, myTeam).length >= spawnDirections.size()-1, State.TENDING_GARDEN)
+    };
+    private static ConditionState[] clearForestTransitions = {
+            new ConditionState(() -> rc.senseNearbyTrees(-1, Team.NEUTRAL).length == 0, State.PLANTING_GARDEN)
+    };
+    private static ConditionState[] idleTransitions = {
+            new ConditionState(() -> nearbyEnemies.length > 0, State.HARASSING)
+    };
+    private static ConditionState[] spawnTransitions = {};
 
     /**
      * BotType specific run - called every loop
@@ -66,15 +86,15 @@ public class Gardener extends BotState {
 
             switch (state) {
                 case SEARCHING_GARDEN_SPOT:
-                    search();
+                    Action.search(searchTransitions);
                     break;
                 case PLANTING_GARDEN:
                     switch(globalState) {
                         case OPENING:
-                            spawn(RobotType.SCOUT);
+                            Action.spawn(spawnTransitions, RobotType.SCOUT);
                             break;
                         default:
-                            plant();
+                            Action.plant(plantTransitions, getPlantDirection());
                             water();
                             break;
                     }
@@ -82,18 +102,20 @@ public class Gardener extends BotState {
                 case TENDING_GARDEN:
                     switch(globalState) {
                         case OPENING:
-                            spawn(RobotType.SCOUT);
+                            Action.spawn(spawnTransitions, RobotType.SCOUT);
                             break;
                         case MIDGAME:
-                            spawn(RobotType.SOLDIER);
-                            break;
                         case ENDGAME:
-                            spawn(RobotType.TANK);
+                            Action.spawn(spawnTransitions, RobotType.SOLDIER);
+                            break;
                     }
                     water();
                     break;
+                case CLEARING_FOREST:
+                    Action.clearForest(clearForestTransitions);
+                    break;
                 default:
-                    idle();
+                    Action.idle(idleTransitions);
                     break;
             }
         } catch (Exception e) {
@@ -107,46 +129,20 @@ public class Gardener extends BotState {
      */
 
     /**
-     * State specific functions
-     *
-     * @return true if state changed
+     * Helper Functions
      */
-
-    private static boolean search() {
-        // Check for state change
-        if (rc.senseNearbyRobots(3).length == 0 && rc.senseNearbyTrees(2).length == 0) {
-            spawnDirections = Util.getSpawnableDirections(1);
-            state = State.PLANTING_GARDEN;
-            return true;
-        }
-
-        // Act according to state
-        Nav.moveTo(center);
-        return false;
-    }
-
-    private static boolean plant() {
-        // Check for state change
-        if (rc.senseNearbyTrees(3, myTeam).length >= spawnDirections.size()-1) {
-            state = State.TENDING_GARDEN;
-            return true;
-        }
-
-        Debug.out("Spawn Directions: " + spawnDirections.size());
-        Debug.out("Nearby Trees: " + rc.senseNearbyTrees(3, myTeam).length);
-        // Act according to state;
+    private static Direction getPlantDirection() {
         try {
-            Direction spawnDirection = getPlantDirection();
-            if (spawnDirection != null) {
-                rc.plantTree(spawnDirection);
+            for (Direction spawnDirection : spawnDirections) {
+                if (rc.canPlantTree(spawnDirection))
+                    return spawnDirection;
             }
-
         } catch (Exception e) {
-            Debug.out("Plant Exception");
+            Debug.out("Get Spawn Direction Exception");
             e.printStackTrace();
         }
 
-        return false;
+        return null;
     }
 
     private static boolean water() {
@@ -173,51 +169,5 @@ public class Gardener extends BotState {
         }
 
         return false;
-    }
-
-    private static boolean spawn() {
-//        if(Signal.isBorderDetected())
-//            spawn(RobotType.SOLDIER);
-//        else
-        spawn(RobotType.SCOUT);
-        return false;
-    }
-
-    private static boolean spawn(RobotType robotType) {
-        try {
-            Direction spawnDirection = Util.getRobotSpawnDirection(robotType);
-            if (spawnDirection != null) {
-                rc.buildRobot(robotType, spawnDirection);
-            }
-        } catch (Exception e) {
-            Debug.out("Spawn Exception");
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    private static boolean idle() {
-        Nav.moveTo(myLocation);
-        return false;
-    }
-
-    /**
-     * Helper Functions
-     *
-     * @return
-     */
-    private static Direction getPlantDirection() {
-        try {
-            for (Direction spawnDirection : spawnDirections) {
-                if (rc.canPlantTree(spawnDirection))
-                    return spawnDirection;
-            }
-        } catch (Exception e) {
-            Debug.out("Get Spawn Direction Exception");
-            e.printStackTrace();
-        }
-
-        return null;
     }
 }

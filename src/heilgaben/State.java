@@ -5,6 +5,16 @@ public enum State {
     INIT,
     IDLE,
 
+    // ARCHON
+    HIRING_GARDENERS,
+
+    // LUMBERJACK
+
+    // SOLDIER
+
+    // TANK
+
+
     // SCOUT
     DETECTING_BORDER_X,
     DETECTING_BORDER_Y,
@@ -17,4 +27,5 @@ public enum State {
     SEARCHING_GARDEN_SPOT,
     PLANTING_GARDEN,
     TENDING_GARDEN,
+    CLEARING_FOREST,
 }

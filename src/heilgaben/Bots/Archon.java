@@ -3,6 +3,9 @@ package heilgaben.Bots;
 import battlecode.common.*;
 
 import heilgaben.*;
+import heilgaben.Actions.Action;
+import heilgaben.Actions.ConditionState;
+
 import static heilgaben.SignalConstants.*;
 
 public class Archon extends BotState {
@@ -10,6 +13,17 @@ public class Archon extends BotState {
     /**
      * BotType specific variables
      */
+
+    /**
+     * State Transitions
+     */
+    private static ConditionState[] hireTransitions = {
+            new ConditionState(() -> rc.getRoundNum()%50 > 10, State.SHAKING_TREES)
+    };
+    private static ConditionState[] shakeTransitions = {
+            new ConditionState(() -> Map.getClosestNonemptyBulletTree() == null, State.IDLE)
+    };
+    private static ConditionState[] idleTransitions = {};
 
     /**
      * BotType specific run - called every loop
@@ -44,6 +58,8 @@ public class Archon extends BotState {
         try {
             Map.initCenter();
             Map.initBorders();
+
+            state = State.IDLE;
         } catch (Exception e){
             Debug.out("Init Exception");
             e.printStackTrace();
@@ -58,8 +74,18 @@ public class Archon extends BotState {
             Map.updateBorders();
             updateGlobalState();
 
-            spawn();
-            Nav.moveTo(myLocation);
+            switch(state){
+                case HIRING_GARDENERS:
+                    Action.spawn(hireTransitions, RobotType.GARDENER);
+                    break;
+                case SHAKING_TREES:
+                    Action.shake(shakeTransitions);
+                    break;
+                case IDLE:
+                    Action.idle(idleTransitions);
+                    break;
+            }
+
         } catch (Exception e){
             Debug.out("Act Exception");
             e.printStackTrace();
@@ -70,25 +96,12 @@ public class Archon extends BotState {
      * Initialisation functions
      */
 
+    //...
+
     /**
-     * State specific functions
-     * @return true if state changed
+     * Helper Functions
+     * @return
      */
-
-    private static boolean spawn() {
-        try {
-            Direction spawnDirection = Util.getRobotSpawnDirection(RobotType.GARDENER);
-            if(spawnDirection != null) {
-                rc.hireGardener(spawnDirection);
-                return true;
-            }
-        } catch (Exception e) {
-            Debug.out("Spawn Exception");
-            e.printStackTrace();
-        }
-
-        return false;
-    }
 
     private static boolean updateGlobalState() {
         int globalState = Signal.receiveSignal(GLOBAL_STATE);
@@ -96,7 +109,7 @@ public class Archon extends BotState {
             case NO_DATA:
                 Signal.broadcastSignal(GLOBAL_STATE, OPENING);
             case OPENING:
-                if(rc.getRoundNum() > 300) {
+                if(rc.getRoundNum() > 200) {
                     Signal.broadcastSignal(GLOBAL_STATE, MIDGAME);
                     return true;
                 }

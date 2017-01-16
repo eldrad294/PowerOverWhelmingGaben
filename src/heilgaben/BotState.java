@@ -12,6 +12,7 @@ public class BotState {
     public static MapLocation myLocation;
     public static MapLocation targetLocation = null;
     public static State state = State.NONE;
+    public static int scoutCount = 0;
 
     /* Type Info */
     public static RobotType myType;
@@ -41,6 +42,7 @@ public class BotState {
     public static MapLocation[] enemyStartingLocations;
     public static MapLocation center;
     public static float[] border = {-1, -1, -1, -1};
+    public static MapLocation[] startingLocations;
 
     public static void init(RobotController inRc) {
         /* Robot Info */
@@ -68,6 +70,15 @@ public class BotState {
         /* Surroundings Info */
         ourStartingLocations = rc.getInitialArchonLocations(myTeam);
         enemyStartingLocations = rc.getInitialArchonLocations(enemyTeam);
+
+        /* All Starting Locations */
+        // Temporary
+        int aLen = ourStartingLocations.length;
+        int bLen = enemyStartingLocations.length;
+        startingLocations = new MapLocation[aLen+bLen];
+
+        System.arraycopy(ourStartingLocations, 0, startingLocations, 0, aLen);
+        System.arraycopy(enemyStartingLocations, 0, startingLocations, aLen, bLen);
     }
 
     public static void update() {
