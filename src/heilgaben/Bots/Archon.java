@@ -23,7 +23,9 @@ public class Archon extends BotState {
     private static ConditionState[] shakeTransitions = {
             new ConditionState(() -> Map.getClosestNonemptyBulletTree() == null, State.IDLE)
     };
-    private static ConditionState[] idleTransitions = {};
+    private static ConditionState[] idleTransitions = {
+            new ConditionState(() -> rc.getRoundNum()%50 <= 10, State.HIRING_GARDENERS)
+    };
 
     /**
      * BotType specific run - called every loop
