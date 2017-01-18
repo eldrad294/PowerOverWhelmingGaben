@@ -59,4 +59,24 @@ public class Util extends BotState {
     public static float getDistance(MapLocation v1, MapLocation v2){
         return (float)Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2));
     }
+
+    //Returns robot type based on RobotController.getType().ordinal()
+    public static RobotType getRobotType(int ordinal){
+        switch(ordinal){
+            case 0:
+                return RobotType.ARCHON;
+            case 1:
+                return RobotType.GARDENER;
+            case 2:
+                return RobotType.SOLDIER;
+            case 3:
+                return RobotType.TANK;
+            case 4:
+                return RobotType.SCOUT;
+            case 5:
+                return RobotType.LUMBERJACK;
+            default:
+                return null;
+        }
+    }
 }
