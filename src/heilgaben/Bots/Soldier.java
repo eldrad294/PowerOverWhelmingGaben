@@ -81,7 +81,7 @@ public class Soldier extends BotState {
 
             switch(state){
                 case ATTACKING:
-                    Action.attack(attackTransitions);
+                    Action.harass(attackTransitions);
                     break;
                 case SHAKING_TREES:
                     Action.shake(shakeTransitions);

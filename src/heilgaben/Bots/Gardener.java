@@ -6,6 +6,7 @@ import heilgaben.*;
 import heilgaben.Actions.*;
 
 import static heilgaben.SignalConstants.*;
+import static heilgaben.Util.getSpawnableDirections;
 
 import java.util.ArrayList;
 
@@ -22,15 +23,18 @@ public class Gardener extends BotState {
      * State Transitions
      */
     private static ConditionState[] searchTransitions = {
-            new ConditionState(() -> rc.senseNearbyRobots(myBodyRadius + 4).length == 0 && rc.senseNearbyTrees(3).length == 0, State.PLANTING_GARDEN),
+            new ConditionState(() -> rc.senseNearbyRobots(myBodyRadius + 2).length == 0 && rc.senseNearbyTrees(myBodyRadius + 2).length == 0, State.PLANTING_GARDEN),
             new ConditionState(() -> rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0, State.SPAWNING_LUMBERJACK),
     };
     private static ConditionState[] plantTransitions = {
             new ConditionState(() -> rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0, State.SPAWNING_LUMBERJACK),
-            new ConditionState(() -> rc.senseNearbyTrees(3, myTeam).length >= spawnDirections.size()-1, State.TENDING_GARDEN)
+            new ConditionState(() -> nearbyEnemies.length > 0, State.SPAWNING_SOLDIER),
+            new ConditionState(() -> rc.getTeamBullets() < 50 || rc.senseNearbyTrees(3, myTeam).length >= getSpawnableDirections(1).size()-1, State.TENDING_GARDEN),
     };
     private static ConditionState[] idleTransitions = {
-            new ConditionState(() -> nearbyEnemies.length == 0, State.SEARCHING_GARDEN_SPOT)
+            new ConditionState(() -> globalState == OPENING, State.SPAWNING_SCOUT),
+            new ConditionState(() -> nearbyEnemies.length == 0, State.SEARCHING_GARDEN_SPOT),
+            new ConditionState(() -> nearbyEnemies.length > 0, State.SPAWNING_SOLDIER)
     };
     private static ConditionState[] spawnScoutTransitions = {
             new ConditionState(() -> globalState != OPENING, State.SPAWNING_SOLDIER),
@@ -39,13 +43,19 @@ public class Gardener extends BotState {
     };
     private static ConditionState[] spawnSoldierTransition = {
             new ConditionState(() -> rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0, State.SPAWNING_LUMBERJACK),
-            new ConditionState(() -> rc.getTeamBullets() < 100, State.SEARCHING_GARDEN_SPOT)
+            new ConditionState(() -> rc.getTeamBullets() < 100, State.TENDING_GARDEN)
     };
     private static ConditionState[] spawnLumberjackTransition = {
-            new ConditionState(() -> rc.getTeamBullets() < 100, State.SEARCHING_GARDEN_SPOT),
+            new ConditionState(() -> rc.senseNearbyTrees(-1, Team.NEUTRAL).length == 0, State.SEARCHING_GARDEN_SPOT),
     };
     private static ConditionState[] spawnTankTransition = {
-            new ConditionState(() -> rc.getTeamBullets() < 300, State.SPAWNING_SOLDIER)
+            new ConditionState(() -> rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0, State.SPAWNING_LUMBERJACK),
+            new ConditionState(() -> rc.getTeamBullets() < 300, State.TENDING_GARDEN)
+    };
+    private static ConditionState[] waterTransition = {
+            new ConditionState(() -> rc.getTeamBullets() >= 50 && rc.senseNearbyTrees(3, myTeam).length < getSpawnableDirections(1).size()-1, State.PLANTING_GARDEN),
+            new ConditionState(() -> rc.getTeamBullets() >= 100, State.SPAWNING_SOLDIER),
+            new ConditionState(() -> rc.getTeamBullets() >= 300, State.SPAWNING_TANK)
     };
 
     /**
@@ -103,13 +113,12 @@ public class Gardener extends BotState {
                     break;
                 case PLANTING_GARDEN:
                     rc.setIndicatorDot(myLocation, 0, 255, 0);
+                    rc.setIndicatorLine(myLocation, myLocation.add(getPlantDirection()), 0, 255, 0);
                     Action.plant(plantTransitions, getPlantDirection());
-                    water();
                     break;
                 case TENDING_GARDEN:
                     rc.setIndicatorDot(myLocation, 0, 0, 255);
-                    Action.spawn(spawnSoldierTransition, RobotType.SOLDIER);
-                    water();
+                    Action.water(waterTransition);
                     break;
                 case SPAWNING_SCOUT:
                     rc.setIndicatorDot(myLocation, 0, 0, 0);
@@ -146,6 +155,8 @@ public class Gardener extends BotState {
      * Helper Functions
      */
     private static Direction getPlantDirection() {
+        ArrayList<Direction> spawnDirections = getSpawnableDirections(1);
+
         try {
             for (Direction spawnDirection : spawnDirections) {
                 if (rc.canPlantTree(spawnDirection))
@@ -157,31 +168,5 @@ public class Gardener extends BotState {
         }
 
         return null;
-    }
-
-    private static boolean water() {
-        try {
-            TreeInfo[] treesInRange = rc.senseNearbyTrees(2, myTeam);
-            if (treesInRange.length > 0) {
-                TreeInfo lowestTree = treesInRange[0];
-
-                for (TreeInfo tree : treesInRange) {
-                    MapLocation treeLocation = tree.location;
-                    if (rc.canInteractWithTree(treeLocation))
-                        if (rc.canWater(treeLocation)) {
-                            if (lowestTree.health > tree.health) {
-                                lowestTree = tree;
-                            }
-                        }
-                }
-
-                rc.water(lowestTree.location);
-            }
-        } catch (Exception e) {
-            Debug.out("Water Exception");
-            e.printStackTrace();
-        }
-
-        return false;
     }
 }

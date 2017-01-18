@@ -34,9 +34,9 @@ public class Lumberjack extends BotState {
     };
     private static ConditionState[] idleTransitions = {
             new ConditionState(() -> nearbyEnemies.length > 0, State.STRIKING),
-            new ConditionState(() -> nearbyEnemies.length == 0 && nearbyTrees.length > 0, State.CHOPPING),
+            new ConditionState(() -> nearbyTrees.length > 0, State.CHOPPING),
             new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
-            new ConditionState(() -> nearbyEnemies.length == 0 && nearbyTrees.length == 0, State.SCOUTING)
+            new ConditionState(() -> true, State.SCOUTING)
     };
     /**
      * BotType specific run - called every loop

@@ -2,8 +2,12 @@ package heilgaben.Bots;
 
 import battlecode.common.*;
 import heilgaben.*;
+import heilgaben.Actions.*;
 
 public class Tank extends BotState {
+
+    private static ConditionState[] idleTransitions = {};
+
     public static void run() throws GameActionException {
         /* Tank specific init */
         init();
@@ -30,6 +34,8 @@ public class Tank extends BotState {
         try {
             Map.initCenter();
             Map.initBorders();
+
+            state = State.IDLE;
         } catch (Exception e){
             Debug.out("Init Exception");
             e.printStackTrace();
@@ -39,6 +45,11 @@ public class Tank extends BotState {
     private static void act() {
         try {
             Map.updateBorders();
+
+            switch(state){
+                case IDLE:
+                    Action.idle(idleTransitions);
+            }
         } catch (Exception e){
             Debug.out("Act Exception");
             e.printStackTrace();

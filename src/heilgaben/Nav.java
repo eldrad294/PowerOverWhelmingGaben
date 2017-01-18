@@ -86,6 +86,8 @@ public class Nav extends BotState {
                 case GARDENER:
                     if (robot.type == myType)
                         robotRepulsion = myType.sensorRadius;
+                    if(state != State.IDLE && state != State.SEARCHING_GARDEN_SPOT)
+                        return null;
                     break;
             }
 
@@ -101,6 +103,9 @@ public class Nav extends BotState {
             switch(myType) {
                 case SCOUT:
                     continue;
+                case GARDENER:
+                    if(state != State.IDLE && state != State.SEARCHING_GARDEN_SPOT)
+                        return null;
             }
 
             if (myLocation.distanceTo(treeLocation) <= treeRepulsion)

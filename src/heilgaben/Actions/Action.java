@@ -38,35 +38,26 @@ public class Action extends BotState {
         // Act according to state
         try {
             if (nearbyTrees.length > 0) {
-                MapLocation closestTreeLocation = nearbyTrees[0].location;
+                TreeInfo closestTree = nearbyTrees[0];
+                MapLocation closestTreeLocation = closestTree.location;
+                for (TreeInfo tree: nearbyTrees) {
+                    MapLocation treeLocation = tree.location;
 
+                    if(myLocation.distanceTo(treeLocation) < myLocation.distanceTo(closestTreeLocation))
+                        closestTreeLocation = treeLocation;
+                }
                 rc.setIndicatorLine(myLocation, closestTreeLocation, 255, 0, 0);
 
-                if(rc.canInteractWithTree(closestTreeLocation)) {
+                if (rc.canInteractWithTree(closestTreeLocation) && closestTree.team != myTeam) {
                     if (rc.canChop(closestTreeLocation))
                         rc.chop(closestTreeLocation);
-                }
-                else
+                } else
                     Nav.moveTo(closestTreeLocation);
             }
         } catch (Exception e) {
             Debug.out("Chop Exception");
             e.printStackTrace();
         }
-        return false;
-    }
-
-    // TODO: WIP
-    public static boolean clearForest(ConditionState[] conditionStateList) {
-        // Check for state change
-        for (ConditionState cs: conditionStateList){
-            if(cs.condition.isValid()){
-                state = cs.nextState;
-                return true;
-            }
-        }
-
-        Action.spawn(new ConditionState[0], RobotType.LUMBERJACK);
         return false;
     }
 
@@ -327,6 +318,41 @@ public class Action extends BotState {
             Debug.out("Strike Exception");
             e.printStackTrace();
         }
+        return false;
+    }
+
+    public static boolean water(ConditionState[] conditionStateList) {
+        // Check for state change
+        for (ConditionState cs: conditionStateList){
+            if(cs.condition.isValid()){
+                state = cs.nextState;
+                return true;
+            }
+        }
+
+        // Act according to state
+        try {
+            TreeInfo[] treesInRange = rc.senseNearbyTrees(2, myTeam);
+            if (treesInRange.length > 0) {
+                TreeInfo lowestTree = treesInRange[0];
+
+                for (TreeInfo tree : treesInRange) {
+                    MapLocation treeLocation = tree.location;
+                    if (rc.canInteractWithTree(treeLocation))
+                        if (rc.canWater(treeLocation)) {
+                            if (lowestTree.health > tree.health) {
+                                lowestTree = tree;
+                            }
+                        }
+                }
+
+                rc.water(lowestTree.location);
+            }
+        } catch (Exception e) {
+            Debug.out("Water Exception");
+            e.printStackTrace();
+        }
+
         return false;
     }
 }
