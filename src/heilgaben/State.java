@@ -9,8 +9,11 @@ public enum State {
     HIRING_GARDENERS,
 
     // LUMBERJACK
+    STRIKING,
+    CHOPPING,
 
     // SOLDIER
+    ATTACKING,
 
     // TANK
 

@@ -2,12 +2,35 @@ package heilgaben.Bots;
 
 import battlecode.common.*;
 import heilgaben.*;
+import heilgaben.Actions.*;
 
 public class Soldier extends BotState {
 
     /**
      * BotType Specific Variables
      */
+
+    /**
+     * State Transitions
+     */
+    private static ConditionState[] attackTransitions = {
+        new ConditionState(() -> nearbyEnemies.length == 0 && Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
+        new ConditionState(() -> nearbyEnemies.length == 0, State.SCOUTING)
+    };
+
+    private static ConditionState[] shakeTransitions = {
+        new ConditionState(() -> nearbyEnemies.length > 0, State.ATTACKING),
+        new ConditionState(() -> Map.getClosestNonemptyBulletTree() == null, State.SCOUTING),
+    };
+    private static ConditionState[] scoutTransitions = {
+        new ConditionState(() -> nearbyEnemies.length > 0, State.ATTACKING),
+        new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES)
+    };
+    private static ConditionState[] idleTransitions = {
+        new ConditionState(() -> nearbyEnemies.length > 0, State.ATTACKING),
+        new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
+        new ConditionState(() -> true, State.SCOUTING)
+    };
 
     /**
      * BotType specific run - called every loop
@@ -41,6 +64,8 @@ public class Soldier extends BotState {
         try {
             Map.initCenter();
             Map.initBorders();
+
+            state = State.IDLE;
         } catch (Exception e){
             Debug.out("Init Exception");
             e.printStackTrace();
@@ -53,6 +78,21 @@ public class Soldier extends BotState {
     private static void act() {
         try {
             Map.updateBorders();
+
+            switch(state){
+                case ATTACKING:
+                    Action.attack(attackTransitions);
+                    break;
+                case SHAKING_TREES:
+                    Action.shake(shakeTransitions);
+                    break;
+                case SCOUTING:
+                    Action.scout(scoutTransitions);
+                    break;
+                case IDLE:
+                    Action.idle(idleTransitions);
+                    break;
+            }
         } catch (Exception e){
             Debug.out("Act Exception");
             e.printStackTrace();

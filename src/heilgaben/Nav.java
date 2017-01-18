@@ -27,7 +27,7 @@ public class Nav extends BotState {
             if (rc.canMove(moveDirection, maxMoveDistance)) {
                 rc.move(moveDirection, maxMoveDistance);
 
-                MapLocation nextLocation = new MapLocation(myLocation.x + moveDirection.getDeltaX(1), myLocation.y + moveDirection.getDeltaY(1));
+                MapLocation nextLocation = new MapLocation(myLocation.x + moveDirection.getDeltaX(2), myLocation.y + moveDirection.getDeltaY(2));
                 rc.setIndicatorLine(myLocation, nextLocation, 255, 0, 255);
 
                 if(targetLocation != null)
@@ -52,10 +52,9 @@ public class Nav extends BotState {
         }
 
         ArrayList<Vector> repulsiveDirections = getRepulsiveVectors(myBodyRadius*2);
+        ArrayList<Vector> attractiveDirections = getAttractiveVectors(myBodyRadius*2);
         allDirections.addAll(repulsiveDirections);
-
-//        ArrayList<Direction> attractiveDirections = getAttractiveDirections(myBodyRadius*2);
-//        allDirections.addAll(attractiveDirections);
+        allDirections.addAll(attractiveDirections);
 
 
         Vector resultant = computeResultantVector(allDirections);
@@ -65,44 +64,67 @@ public class Nav extends BotState {
     }
 
     public static ArrayList<Vector> getRepulsiveVectors(float repulsionRadius){
-        ArrayList<Vector> repulsionDirections = new ArrayList<>();
+        ArrayList<Vector> repulsionVectors = new ArrayList<>();
 
+        // Avoid robots, unless you're a scout or a lumberjack
         for(RobotInfo robot: nearbyRobots) {
             MapLocation robotLocation = robot.getLocation();
-            float robotRepulsion = repulsionRadius + (robot.getRadius()*2);
-            if(myType == RobotType.GARDENER && robot.type == myType && robot.team == myTeam)
-                robotRepulsion = myType.sensorRadius;
-            if(myType == RobotType.SCOUT && robot.type == RobotType.GARDENER && robot.team == enemyTeam)
-                continue;
-            if (myLocation.distanceTo(robotLocation) <= robotRepulsion)
-                repulsionDirections.add(new Vector(robotLocation, myLocation));
-        }
+            float robotRepulsion = repulsionRadius + (robot.getRadius() * 2);
 
-        if(myType != RobotType.SCOUT) {
-            for (TreeInfo tree : nearbyTrees) {
-                MapLocation treeLocation = tree.getLocation();
-                float treeRepulsion = repulsionRadius + (tree.getRadius()*1);
-                if (myLocation.distanceTo(treeLocation) <= treeRepulsion)
-                    repulsionDirections.add(new Vector(treeLocation, myLocation));
+            switch (myType) {
+                case SCOUT:
+                    if (robot.team == enemyTeam && robot.type == RobotType.GARDENER)
+                        continue;
+                    break;
+                case LUMBERJACK:
+                    if (robot.team == enemyTeam)
+                        continue;
+
+                    if (robot.type == myType)
+                        robotRepulsion = myType.sensorRadius;
+                    break;
+                case GARDENER:
+                    if (robot.type == myType)
+                        robotRepulsion = myType.sensorRadius;
+                    break;
             }
+
+            if (myLocation.distanceTo(robotLocation) <= robotRepulsion)
+                repulsionVectors.add(new Vector(robotLocation, myLocation));
         }
 
+        // Avoid trees unless you're a scout
+        for (TreeInfo tree : nearbyTrees) {
+            MapLocation treeLocation = tree.getLocation();
+            float treeRepulsion = repulsionRadius + (tree.getRadius()*1);
+
+            switch(myType) {
+                case SCOUT:
+                    continue;
+            }
+
+            if (myLocation.distanceTo(treeLocation) <= treeRepulsion)
+                repulsionVectors.add(new Vector(treeLocation, myLocation));
+        }
+
+        // Avoid or run away from bullets
         for(BulletInfo bullet: nearbyBullets) {
             MapLocation bulletLocation = bullet.getLocation();
             if(willCollideWithMe(bullet)) {
-                repulsionDirections.add(new Vector(new Direction(bulletLocation, myLocation).rotateLeftDegrees(90), 3));
+                repulsionVectors.add(new Vector(new Direction(bulletLocation, myLocation).rotateLeftDegrees(90), 3));
             } else
-                repulsionDirections.add(new Vector(new Direction(bulletLocation, myLocation), 0.25f));
+                repulsionVectors.add(new Vector(new Direction(bulletLocation, myLocation), 0.25f));
         }
 
+        // Stay away from borders
         try {
             Direction closestBorder = Map.getClosestBorder();
             if (!rc.onTheMap(myLocation, repulsionRadius)) {
                 if(closestBorder.radians%Math.PI != 0) {
                     if (Signal.isBorderXDetected())
-                        repulsionDirections.add(new Vector(Map.getClosestBorder(), 3));
+                        repulsionVectors.add(new Vector(Map.getClosestBorder(), 3));
                 } else if (Signal.isBorderYDetected()) {
-                    repulsionDirections.add(new Vector(Map.getClosestBorder(), 3));
+                    repulsionVectors.add(new Vector(Map.getClosestBorder(), 3));
                 }
             }
         } catch (Exception e) {
@@ -110,25 +132,53 @@ public class Nav extends BotState {
             e.printStackTrace();
         }
 
-        return repulsionDirections;
+        return repulsionVectors;
     }
 
-    private static ArrayList<Direction> getAttractiveDirections(float attractionMin) {
-        ArrayList<Direction> attractionDirections = new ArrayList<>();
+    private static ArrayList<Vector> getAttractiveVectors(float attractionMin) {
+        ArrayList<Vector> attractionVectors = new ArrayList<>();
 
-        for(RobotInfo robot: nearbyRobots) {
+        for (RobotInfo robot : nearbyEnemies) {
             MapLocation robotLocation = robot.getLocation();
-            if (myLocation.distanceTo(robotLocation) >= attractionMin + (robot.getRadius()*2))
-                attractionDirections.add(new Direction(myLocation, robotLocation));
+
+            switch(myType){
+                case SCOUT:
+                    if(state == State.SCOUTING || state == State.DETECTING_BORDER_X || state == State.DETECTING_BORDER_Y)
+                        return null;
+                    break;
+                case LUMBERJACK:
+                    if(state != State.STRIKING)
+                        return null;
+                    break;
+            }
+
+            if (myLocation.distanceTo(robotLocation) >= myBodyRadius + robot.getRadius() + GameConstants.LUMBERJACK_STRIKE_RADIUS) {
+                attractionVectors.add(new Vector(myLocation, robotLocation));
+            }
         }
 
-        for(TreeInfo tree: nearbyTrees) {
+
+        for (TreeInfo tree : nearbyTrees) {
             MapLocation treeLocation = tree.getLocation();
-            if (myLocation.distanceTo(treeLocation) <= (attractionMin + (tree.getRadius()*2)))
-                attractionDirections.add(new Direction(myLocation, treeLocation));
+
+            switch(state) {
+                case SHAKING_TREES:
+                    if (tree.containedBullets == 0)
+                        continue;
+                case CHOPPING:
+                    break;
+                default:
+                    continue;
+            }
+
+            if (myLocation.distanceTo(treeLocation) <= (attractionMin + (tree.getRadius() * 2))) {
+                attractionVectors.add(new Vector(myLocation, treeLocation));
+                break;
+            }
         }
 
-        return attractionDirections;
+
+        return attractionVectors;
     }
 
     public static Vector computeResultantVector(ArrayList<Vector> vectorList){

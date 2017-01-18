@@ -3,8 +3,6 @@ package heilgaben.Actions;
 import battlecode.common.*;
 import heilgaben.*;
 
-import java.util.ArrayList;
-
 import static heilgaben.SignalConstants.*;
 
 /**
@@ -14,6 +12,50 @@ import static heilgaben.SignalConstants.*;
  */
 
 public class Action extends BotState {
+
+    public static boolean attack(ConditionState[] conditionStateList) {
+        //Check for state change
+        for (ConditionState cs: conditionStateList){
+            if(cs.condition.isValid()){
+                state = cs.nextState;
+                return true;
+            }
+        }
+
+        //Act according to state
+        // TODO: Attack
+        return false;
+    }
+    public static boolean chop(ConditionState[] conditionStateList) {
+        // Check for state change
+        for (ConditionState cs: conditionStateList){
+            if(cs.condition.isValid()){
+                state = cs.nextState;
+                return true;
+            }
+        }
+
+        // Act according to state
+        try {
+            if (nearbyTrees.length > 0) {
+                MapLocation closestTreeLocation = nearbyTrees[0].location;
+
+                rc.setIndicatorLine(myLocation, closestTreeLocation, 255, 0, 0);
+
+                if(rc.canInteractWithTree(closestTreeLocation)) {
+                    if (rc.canChop(closestTreeLocation))
+                        rc.chop(closestTreeLocation);
+                }
+                else
+                    Nav.moveTo(closestTreeLocation);
+            }
+        } catch (Exception e) {
+            Debug.out("Chop Exception");
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     // TODO: WIP
     public static boolean clearForest(ConditionState[] conditionStateList) {
         // Check for state change
@@ -92,14 +134,10 @@ public class Action extends BotState {
         }
 
         // Act according to state
-        RobotInfo closestEnemy = null;
-        for (RobotInfo enemy : nearbyEnemies) {
-            if(closestEnemy == null || myLocation.distanceTo(enemy.location) < myLocation.distanceTo(closestEnemy.location))
-                closestEnemy = enemy;
-        }
-
-        if(closestEnemy == null)
+        if(nearbyEnemies.length == 0)
             return false;
+
+        RobotInfo closestEnemy = nearbyEnemies[0];
 
         try {
             MapLocation enemyLocation = closestEnemy.location;
@@ -239,13 +277,9 @@ public class Action extends BotState {
         }
 
         // Act according to state
-
-        MapLocation[] broadcastLocations = rc.senseBroadcastingRobotLocations();
         MapLocation scoutLocation;
-        if(broadcastLocations.length == 0)
-            scoutLocation = startingLocations[scoutCount%startingLocations.length];
-        else
-            scoutLocation = broadcastLocations[scoutCount%broadcastLocations.length];
+        scoutLocation = startingLocations[scoutCount%startingLocations.length];
+
         if(scoutLocation.isWithinDistance(myLocation, myRobotSightRadius))
             scoutCount++;
 
@@ -266,6 +300,33 @@ public class Action extends BotState {
 
         // Act according to state
         Nav.moveTo(center);
+        return false;
+    }
+
+    public static boolean strike(ConditionState[] conditionStateList) {
+        // Check for state change
+        for (ConditionState cs: conditionStateList){
+            if(cs.condition.isValid()){
+                state = cs.nextState;
+                return true;
+            }
+        }
+
+        // Act according to state
+        try {
+            if (nearbyEnemies.length > 0) {
+                MapLocation closestEnemyLocation = nearbyEnemies[0].location;
+                if(rc.getLocation().distanceTo(closestEnemyLocation) < myBodyRadius + 0.25 + nearbyEnemies[0].getRadius()) {
+                    if (rc.canStrike())
+                        rc.strike();
+                }
+                else
+                    Nav.moveTo(closestEnemyLocation);
+            }
+        } catch (Exception e) {
+            Debug.out("Strike Exception");
+            e.printStackTrace();
+        }
         return false;
     }
 }

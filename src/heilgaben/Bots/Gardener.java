@@ -32,7 +32,7 @@ public class Gardener extends BotState {
             new ConditionState(() -> rc.senseNearbyTrees(-1, Team.NEUTRAL).length == 0, State.PLANTING_GARDEN)
     };
     private static ConditionState[] idleTransitions = {
-            new ConditionState(() -> nearbyEnemies.length > 0, State.HARASSING)
+            new ConditionState(() -> nearbyEnemies.length > 0, State.TENDING_GARDEN)
     };
     private static ConditionState[] spawnTransitions = {};
 
@@ -69,7 +69,7 @@ public class Gardener extends BotState {
             Map.initCenter();
             Map.initBorders();
 
-            state = State.SEARCHING_GARDEN_SPOT;
+            state = State.IDLE;
         } catch (Exception e) {
             Debug.out("Init Exception");
             e.printStackTrace();
