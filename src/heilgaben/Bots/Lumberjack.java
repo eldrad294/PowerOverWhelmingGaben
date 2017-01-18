@@ -14,8 +14,8 @@ public class Lumberjack extends BotState {
      */
     private static ConditionState[] chopTransitions = {
             new ConditionState(() -> nearbyEnemies.length > 0, State.STRIKING),
-            new ConditionState(() -> nearbyTrees.length == 0, State.SCOUTING),
-            new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES)
+            new ConditionState(() -> nearbyTrees.length == 0, State.SCOUTING)
+//            new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES)
     };
     private static ConditionState[] strikeTransitions = {
             new ConditionState(() -> nearbyEnemies.length == 0 && nearbyTrees.length > 0, State.CHOPPING),
