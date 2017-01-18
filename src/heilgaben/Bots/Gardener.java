@@ -22,19 +22,31 @@ public class Gardener extends BotState {
      * State Transitions
      */
     private static ConditionState[] searchTransitions = {
-            new ConditionState(() -> rc.senseNearbyRobots(3).length == 0 && rc.senseNearbyTrees(3).length == 0, State.PLANTING_GARDEN)
+            new ConditionState(() -> rc.senseNearbyRobots(myBodyRadius + 4).length == 0 && rc.senseNearbyTrees(3).length == 0, State.PLANTING_GARDEN),
+            new ConditionState(() -> rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0, State.SPAWNING_LUMBERJACK),
     };
     private static ConditionState[] plantTransitions = {
-            new ConditionState(() -> rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0, State.CLEARING_FOREST),
+            new ConditionState(() -> rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0, State.SPAWNING_LUMBERJACK),
             new ConditionState(() -> rc.senseNearbyTrees(3, myTeam).length >= spawnDirections.size()-1, State.TENDING_GARDEN)
     };
-    private static ConditionState[] clearForestTransitions = {
-            new ConditionState(() -> rc.senseNearbyTrees(-1, Team.NEUTRAL).length == 0, State.PLANTING_GARDEN)
-    };
     private static ConditionState[] idleTransitions = {
-            new ConditionState(() -> nearbyEnemies.length > 0, State.TENDING_GARDEN)
+            new ConditionState(() -> nearbyEnemies.length == 0, State.SEARCHING_GARDEN_SPOT)
     };
-    private static ConditionState[] spawnTransitions = {};
+    private static ConditionState[] spawnScoutTransitions = {
+            new ConditionState(() -> globalState != OPENING, State.SPAWNING_SOLDIER),
+            new ConditionState(() -> rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0, State.SPAWNING_LUMBERJACK),
+            new ConditionState(() -> rc.getTeamBullets() < 80, State.SEARCHING_GARDEN_SPOT),
+    };
+    private static ConditionState[] spawnSoldierTransition = {
+            new ConditionState(() -> rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0, State.SPAWNING_LUMBERJACK),
+            new ConditionState(() -> rc.getTeamBullets() < 100, State.SEARCHING_GARDEN_SPOT)
+    };
+    private static ConditionState[] spawnLumberjackTransition = {
+            new ConditionState(() -> rc.getTeamBullets() < 100, State.SEARCHING_GARDEN_SPOT),
+    };
+    private static ConditionState[] spawnTankTransition = {
+            new ConditionState(() -> rc.getTeamBullets() < 300, State.SPAWNING_SOLDIER)
+    };
 
     /**
      * BotType specific run - called every loop
@@ -86,35 +98,37 @@ public class Gardener extends BotState {
 
             switch (state) {
                 case SEARCHING_GARDEN_SPOT:
+                    rc.setIndicatorDot(myLocation, 255, 255, 0);
                     Action.search(searchTransitions);
                     break;
                 case PLANTING_GARDEN:
-                    switch(globalState) {
-                        case OPENING:
-                            Action.spawn(spawnTransitions, RobotType.SCOUT);
-                            break;
-                        default:
-                            Action.plant(plantTransitions, getPlantDirection());
-                            water();
-                            break;
-                    }
-                    break;
-                case TENDING_GARDEN:
-                    switch(globalState) {
-                        case OPENING:
-                            Action.spawn(spawnTransitions, RobotType.SCOUT);
-                            break;
-                        case MIDGAME:
-                        case ENDGAME:
-                            Action.spawn(spawnTransitions, RobotType.SOLDIER);
-                            break;
-                    }
+                    rc.setIndicatorDot(myLocation, 0, 255, 0);
+                    Action.plant(plantTransitions, getPlantDirection());
                     water();
                     break;
-                case CLEARING_FOREST:
-                    Action.clearForest(clearForestTransitions);
+                case TENDING_GARDEN:
+                    rc.setIndicatorDot(myLocation, 0, 0, 255);
+                    Action.spawn(spawnSoldierTransition, RobotType.SOLDIER);
+                    water();
                     break;
-                default:
+                case SPAWNING_SCOUT:
+                    rc.setIndicatorDot(myLocation, 0, 0, 0);
+                    Action.spawn(spawnScoutTransitions, RobotType.SCOUT);
+                    break;
+                case SPAWNING_SOLDIER:
+                    rc.setIndicatorDot(myLocation, 50, 50, 50);
+                    Action.spawn(spawnSoldierTransition, RobotType.SOLDIER);
+                    break;
+                case SPAWNING_TANK:
+                    rc.setIndicatorDot(myLocation, 100, 100, 100);
+                    Action.spawn(spawnTankTransition, RobotType.TANK);
+                    break;
+                case SPAWNING_LUMBERJACK:
+                    rc.setIndicatorDot(myLocation, 200, 200, 200);
+                    Action.spawn(spawnLumberjackTransition, RobotType.LUMBERJACK);
+                    break;
+                case IDLE:
+                    rc.setIndicatorDot(myLocation, 200, 200, 255);
                     Action.idle(idleTransitions);
                     break;
             }

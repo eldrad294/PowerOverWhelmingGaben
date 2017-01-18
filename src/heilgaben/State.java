@@ -1,9 +1,12 @@
 package heilgaben;
 
 public enum State {
+    // GENERIC
     NONE,
     INIT,
     IDLE,
+    SCOUTING,
+    SHAKING_TREES,
 
     // ARCHON
     HIRING_GARDENERS,
@@ -17,18 +20,18 @@ public enum State {
 
     // TANK
 
-
     // SCOUT
     DETECTING_BORDER_X,
     DETECTING_BORDER_Y,
     SIGNALING_BORDERS,
-    SHAKING_TREES,
-    SCOUTING,
     HARASSING,
+    SPAWNING_SCOUT,
+    SPAWNING_LUMBERJACK,
+    SPAWNING_TANK,
+    SPAWNING_SOLDIER,
 
     // GARDENER
     SEARCHING_GARDEN_SPOT,
     PLANTING_GARDEN,
     TENDING_GARDEN,
-    CLEARING_FOREST,
 }
