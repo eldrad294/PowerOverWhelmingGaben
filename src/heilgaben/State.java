@@ -7,6 +7,7 @@ public enum State {
     IDLE,
     SCOUTING,
     SHAKING_TREES,
+    ATTACKING,
 
     // ARCHON
     HIRING_GARDENERS,
@@ -16,9 +17,9 @@ public enum State {
     CHOPPING,
 
     // SOLDIER
-    ATTACKING,
 
     // TANK
+    DRIVE,
 
     // SCOUT
     DETECTING_BORDER_X,

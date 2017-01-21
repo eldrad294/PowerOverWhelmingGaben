@@ -54,8 +54,8 @@ public class Gardener extends BotState {
     };
     private static ConditionState[] waterTransition = {
             new ConditionState(() -> rc.getTeamBullets() >= 50 && rc.senseNearbyTrees(3, myTeam).length < getSpawnableDirections(1).size()-1, State.PLANTING_GARDEN),
-            new ConditionState(() -> rc.getTeamBullets() >= 100, State.SPAWNING_SOLDIER),
-            new ConditionState(() -> rc.getTeamBullets() >= 300, State.SPAWNING_TANK)
+            new ConditionState(() -> rc.getTeamBullets() >= 150, State.SPAWNING_TANK),
+            new ConditionState(() -> rc.getTeamBullets() >= 100, State.SPAWNING_SOLDIER)
     };
 
     /**

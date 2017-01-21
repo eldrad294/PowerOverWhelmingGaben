@@ -13,8 +13,8 @@ import static heilgaben.SignalConstants.*;
 
 public class Action extends BotState {
 
-    public static boolean attack(ConditionState[] conditionStateList) {
-        //Check for state change
+    public static boolean drive(ConditionState[] conditionStateList){
+        // Check for state change
         for (ConditionState cs: conditionStateList){
             if(cs.condition.isValid()){
                 state = cs.nextState;
@@ -22,10 +22,55 @@ public class Action extends BotState {
             }
         }
 
-        //Act according to state
-        // TODO: Attack
+        // Act according to state
+        MapLocation scoutLocation;
+        scoutLocation = startingLocations[scoutCount%startingLocations.length];
+
+        if(scoutLocation.isWithinDistance(myLocation, myRobotSightRadius))
+            scoutCount++;
+
+        Nav.moveTo(scoutLocation);
+
         return false;
     }
+
+    public static boolean attack(ConditionState[] conditionStateList){
+        // Check for state change
+        for (ConditionState cs: conditionStateList){
+            if(cs.condition.isValid()){
+                state = cs.nextState;
+                return true;
+            }
+        }
+
+        // Act according to state
+        if(nearbyEnemies.length == 0)
+            return false;
+
+        RobotInfo closestEnemy = nearbyEnemies[0];
+
+        try {
+            MapLocation enemyLocation = closestEnemy.location;
+
+            if (rc.canFirePentadShot())
+                rc.firePentadShot(new Direction(myLocation, enemyLocation));
+
+            if (rc.canFireSingleShot())
+                rc.fireSingleShot(new Direction(myLocation, enemyLocation));
+
+            if (!enemyLocation.isWithinDistance(myLocation, 2))
+                Nav.moveTo(enemyLocation);
+            else
+                Nav.moveTo(myLocation);
+
+        } catch (Exception e) {
+            Debug.out("Harass Exception");
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
     public static boolean chop(ConditionState[] conditionStateList) {
         // Check for state change
         for (ConditionState cs: conditionStateList){

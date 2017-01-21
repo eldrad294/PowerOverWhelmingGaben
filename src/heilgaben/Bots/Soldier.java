@@ -22,6 +22,7 @@ public class Soldier extends BotState {
         new ConditionState(() -> nearbyEnemies.length > 0, State.ATTACKING),
         new ConditionState(() -> Map.getClosestNonemptyBulletTree() == null, State.SCOUTING),
     };
+
     private static ConditionState[] scoutTransitions = {
         new ConditionState(() -> nearbyEnemies.length > 0, State.ATTACKING),
         new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES)

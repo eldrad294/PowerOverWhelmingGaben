@@ -6,8 +6,30 @@ import heilgaben.Actions.*;
 
 public class Tank extends BotState {
 
-    private static ConditionState[] idleTransitions = {};
+    /**
+     * BotType Specific Variables
+     */
 
+    /**
+     * State Transitions
+     */
+
+    private static ConditionState[] attackTransitions = {
+            new ConditionState(() -> nearbyEnemies.length == 0, State.DRIVE)
+    };
+
+    private static ConditionState[] driveTransitions = {
+            new ConditionState(() -> nearbyEnemies.length > 0, State.ATTACKING),
+    };
+
+    private static ConditionState[] idleTransitions = {
+            new ConditionState(() -> nearbyEnemies.length > 0, State.ATTACKING),
+            new ConditionState(() -> true, State.DRIVE)
+    };
+
+    /**
+     * BotType specific run - called every loop
+     */
     public static void run() throws GameActionException {
         /* Tank specific init */
         init();
@@ -47,8 +69,15 @@ public class Tank extends BotState {
             Map.updateBorders();
 
             switch(state){
+                case ATTACKING:
+                    Action.attack(attackTransitions);
+                    break;
+                case DRIVE:
+                    Action.drive(driveTransitions);
+                    break;
                 case IDLE:
                     Action.idle(idleTransitions);
+                    break;
             }
         } catch (Exception e){
             Debug.out("Act Exception");
