@@ -40,12 +40,12 @@ public class Util extends BotState {
         ArrayList<Direction> spawnableDirections = new ArrayList<>();
 
         try {
-            for (float radians = 0; radians < ((Math.PI * 2) - interval); radians += interval) {
+            for (float radians = 0; radians < ((Math.PI * 2)); radians += interval) {
                 Direction spawnDirection = new Direction(radians);
-                rc.setIndicatorDot(myLocation.add(spawnDirection, myBodyRadius + 1), 255, 255, 255);
-                if (!rc.isCircleOccupied(myLocation.add(spawnDirection, myBodyRadius + 1), spawnObjectRadius - 0.5f)) {
+                System.out.println("Radians "+radians);
+                //rc.setIndicatorDot(myLocation.add(spawnDirection, myBodyRadius + 1), 255, 255, 255);
+                if (!rc.isCircleOccupied(myLocation.add(spawnDirection, myBodyRadius + 1), spawnObjectRadius - 0.5f))
                     spawnableDirections.add(spawnDirection);
-                }
             }
         } catch (Exception e) {
             Debug.out("Spawnable Directions Exception");
@@ -78,5 +78,22 @@ public class Util extends BotState {
             default:
                 return null;
         }
+    }
+
+    // Return a viable direction for gardener to plant tree
+    public static Direction getPlantDirection() {
+        ArrayList<Direction> spawnDirections = getSpawnableDirections(1);
+
+        try {
+            for (Direction spawnDirection : spawnDirections) {
+                if (rc.canPlantTree(spawnDirection))
+                    return spawnDirection;
+            }
+        } catch (Exception e) {
+            Debug.out("Get Spawn Direction Exception");
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }
