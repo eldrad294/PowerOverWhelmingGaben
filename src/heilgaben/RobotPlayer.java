@@ -13,7 +13,6 @@ public strictfp class RobotPlayer {
     public static void run(RobotController rc) throws GameActionException {
 
         BotState.init(rc);
-
         switch (rc.getType()) {
             case ARCHON:
                 Archon.run();

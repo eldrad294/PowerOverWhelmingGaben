@@ -42,7 +42,6 @@ public class Util extends BotState {
         try {
             for (float radians = 0; radians < ((Math.PI * 2)); radians += interval) {
                 Direction spawnDirection = new Direction(radians);
-                System.out.println("Radians "+radians);
                 //rc.setIndicatorDot(myLocation.add(spawnDirection, myBodyRadius + 1), 255, 255, 255);
                 if (!rc.isCircleOccupied(myLocation.add(spawnDirection, myBodyRadius + 1), spawnObjectRadius - 0.5f))
                     spawnableDirections.add(spawnDirection);

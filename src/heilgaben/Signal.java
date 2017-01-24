@@ -33,8 +33,8 @@ public class Signal extends BotState {
             coord[0] = Float.intBitsToFloat(rc.readBroadcast(channelX));
             coord[1] = Float.intBitsToFloat(rc.readBroadcast(channelY));
         }else{
-            coord[0] = (float).0;
-            coord[1] = (float).0;
+            coord[0] = (float)0;
+            coord[1] = (float)0;
         }
         return coord;
     }

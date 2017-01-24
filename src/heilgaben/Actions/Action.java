@@ -30,7 +30,24 @@ public class Action extends BotState {
         if(scoutLocation.isWithinDistance(myLocation, myRobotSightRadius))
             scoutCount++;
 
-        Nav.moveTo(scoutLocation);
+        try{
+            float[] coordinates;
+            for(int channel=0;channel<40;channel+=2) {
+                coordinates = Signal.receiveCoordinate(channel, channel + 1);
+                if(coordinates[0] == 1000 && coordinates[1] == 1000 && rc.getType() != RobotType.SCOUT)
+                    continue;
+                else if(coordinates[0] > 0 && coordinates[1] > 0 && rc.getType() != RobotType.SCOUT) {
+                    Nav.moveTo(new MapLocation(coordinates[0], coordinates[1]));
+                    break;
+                }else {
+                    Nav.moveTo(scoutLocation);
+                    break;
+                }
+            }
+
+        }catch(GameActionException e){
+            e.printStackTrace();
+        }
 
         return false;
     }
@@ -62,7 +79,7 @@ public class Action extends BotState {
             Nav.moveTo(enemyLocation);
 
         } catch (Exception e) {
-            Debug.out("Harass Exception");
+            Debug.out("Attack Exception");
             e.printStackTrace();
         }
 
@@ -155,10 +172,10 @@ public class Action extends BotState {
                 northSouth[1] = center.y - (northSouth[0] - center.y) - (2*myBodyRadius);
             }
 
-        try{
-            Signal.broadcastCoordinate(NORTH_WEST | DATA_CHANNEL_Y, SOUTH_EAST | DATA_CHANNEL_Y, northSouth);
-            Signal.broadcastSignal(BORDER | DATA_CHANNEL_Y, DETECTED);
-        }catch(GameActionException e){
+            try{
+                Signal.broadcastCoordinate(NORTH_WEST | DATA_CHANNEL_Y, SOUTH_EAST | DATA_CHANNEL_Y, northSouth);
+                Signal.broadcastSignal(BORDER | DATA_CHANNEL_Y, DETECTED);
+            }catch(GameActionException e){
                 e.printStackTrace();
             }
         }
@@ -185,6 +202,18 @@ public class Action extends BotState {
             MapLocation enemyLocation = closestEnemy.location;
             if (rc.canFireSingleShot())
                 rc.fireSingleShot(new Direction(myLocation, enemyLocation));
+
+            // Scouts also broadcast to allied bots, enemies they have encountered
+            if(rc.getType() == RobotType.SCOUT){
+                MapLocation enemyLoc = closestEnemy.location;
+                float[] coordinates = {enemyLoc.x, enemyLoc.y};
+                for(int i=0;i<10;i+= 2){
+                    if(rc.readBroadcast(i) == 0) {
+                        Signal.broadcastCoordinate(i,i+1, coordinates);
+                        break;
+                    }
+                }
+            }
 
             Nav.moveTo(enemyLocation);
 
@@ -316,25 +345,28 @@ public class Action extends BotState {
             }
         }
 
-//        // Act according to state
-//        MapLocation scoutLocation;
-//        scoutLocation = startingLocations[scoutCount%startingLocations.length];
-//
-//        if(scoutLocation.isWithinDistance(myLocation, myRobotSightRadius))
-//            scoutCount++;
-//
-//        Nav.moveTo(scoutLocation);
-        Random r = new Random();
-        int channel;
-        channel = r.nextInt(20);
+        // Act according to state
+        MapLocation scoutLocation;
+        scoutLocation = startingLocations[scoutCount%startingLocations.length];
 
-        // Ensures we get an even channel
-        if(channel % 2 != 0)
-            channel -= 1;
+        if(scoutLocation.isWithinDistance(myLocation, myRobotSightRadius))
+            scoutCount++;
 
         try{
-            float[] coordinates = Signal.receiveCoordinate(channel, channel + 1);
-            Nav.moveTo(new MapLocation(coordinates[0], coordinates[1]));
+            float[] coordinates;
+            for(int channel=0;channel<40;channel+=2) {
+                coordinates = Signal.receiveCoordinate(channel, channel + 1);
+                if(coordinates[0] == 1000 && coordinates[1] == 1000 && rc.getType() != RobotType.SCOUT)
+                    continue;
+                else if(coordinates[0] > 0 && coordinates[1] > 0 && rc.getType() != RobotType.SCOUT) {
+                    Nav.moveTo(new MapLocation(coordinates[0], coordinates[1]));
+                    break;
+                }else {
+                    Nav.moveTo(scoutLocation);
+                    break;
+                }
+            }
+
         }catch(GameActionException e){
             e.printStackTrace();
         }
