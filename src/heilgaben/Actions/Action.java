@@ -2,6 +2,7 @@ package heilgaben.Actions;
 
 import battlecode.common.*;
 import heilgaben.*;
+import scala.util.Random;
 
 import static heilgaben.SignalConstants.*;
 
@@ -58,10 +59,7 @@ public class Action extends BotState {
             if (rc.canFireSingleShot())
                 rc.fireSingleShot(new Direction(myLocation, enemyLocation));
 
-            if (!enemyLocation.isWithinDistance(myLocation, 2))
-                Nav.moveTo(enemyLocation);
-            else
-                Nav.moveTo(myLocation);
+            Nav.moveTo(enemyLocation);
 
         } catch (Exception e) {
             Debug.out("Harass Exception");
@@ -126,8 +124,12 @@ public class Action extends BotState {
                 westEast[0] = center.x - (westEast[1] - center.x) - (2*myBodyRadius);
             }
 
-            Signal.broadcastCoordinate(NORTH_WEST | DATA_CHANNEL_X, SOUTH_EAST | DATA_CHANNEL_X, westEast);
-            Signal.broadcastSignal(BORDER | DATA_CHANNEL_X, DETECTED);
+            try {
+                Signal.broadcastCoordinate(NORTH_WEST | DATA_CHANNEL_X, SOUTH_EAST | DATA_CHANNEL_X, westEast);
+                Signal.broadcastSignal(BORDER | DATA_CHANNEL_X, DETECTED);
+            }catch(GameActionException e){
+                e.printStackTrace();
+            }
         }
 
         return false;
@@ -153,8 +155,12 @@ public class Action extends BotState {
                 northSouth[1] = center.y - (northSouth[0] - center.y) - (2*myBodyRadius);
             }
 
+        try{
             Signal.broadcastCoordinate(NORTH_WEST | DATA_CHANNEL_Y, SOUTH_EAST | DATA_CHANNEL_Y, northSouth);
             Signal.broadcastSignal(BORDER | DATA_CHANNEL_Y, DETECTED);
+        }catch(GameActionException e){
+                e.printStackTrace();
+            }
         }
 
         return false;
@@ -177,16 +183,10 @@ public class Action extends BotState {
 
         try {
             MapLocation enemyLocation = closestEnemy.location;
-            if (rc.canFireSingleShot()) {
+            if (rc.canFireSingleShot())
                 rc.fireSingleShot(new Direction(myLocation, enemyLocation));
-            }
 
-            if (closestEnemy.getType() == RobotType.GARDENER && !enemyLocation.isWithinDistance(myLocation, 2)) {
-                Nav.moveTo(enemyLocation);
-            }
-            else {
-                Nav.moveTo(myLocation);
-            }
+            Nav.moveTo(enemyLocation);
 
         } catch (Exception e) {
             Debug.out("Harass Exception");
@@ -297,8 +297,12 @@ public class Action extends BotState {
         }
 
         // Act according to state
-        Signal.broadcastSignal(BORDER, DETECTED);
-        border = Signal.receiveBorders();
+        try{
+            Signal.broadcastSignal(BORDER, DETECTED);
+            border = Signal.receiveBorders();
+        }catch(GameActionException e){
+            e.printStackTrace();
+        }
         return false;
     }
 
@@ -312,14 +316,28 @@ public class Action extends BotState {
             }
         }
 
-        // Act according to state
-        MapLocation scoutLocation;
-        scoutLocation = startingLocations[scoutCount%startingLocations.length];
+//        // Act according to state
+//        MapLocation scoutLocation;
+//        scoutLocation = startingLocations[scoutCount%startingLocations.length];
+//
+//        if(scoutLocation.isWithinDistance(myLocation, myRobotSightRadius))
+//            scoutCount++;
+//
+//        Nav.moveTo(scoutLocation);
+        Random r = new Random();
+        int channel;
+        channel = r.nextInt(20);
 
-        if(scoutLocation.isWithinDistance(myLocation, myRobotSightRadius))
-            scoutCount++;
+        // Ensures we get an even channel
+        if(channel % 2 != 0)
+            channel -= 1;
 
-        Nav.moveTo(scoutLocation);
+        try{
+            float[] coordinates = Signal.receiveCoordinate(channel, channel + 1);
+            Nav.moveTo(new MapLocation(coordinates[0], coordinates[1]));
+        }catch(GameActionException e){
+            e.printStackTrace();
+        }
 
         return false;
     }

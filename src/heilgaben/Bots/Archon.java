@@ -105,7 +105,7 @@ public class Archon extends BotState {
      * @return
      */
 
-    private static boolean updateGlobalState() {
+    private static boolean updateGlobalState() throws GameActionException{
         int globalState = Signal.receiveSignal(GLOBAL_STATE);
         switch(globalState){
             case NO_DATA:

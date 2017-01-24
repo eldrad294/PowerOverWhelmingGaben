@@ -5,7 +5,7 @@ import battlecode.common.*;
 import static heilgaben.SignalConstants.*;
 
 public class Map extends BotState {
-    public static void initCenter() {
+    public static void initCenter() throws GameActionException{
         if(Signal.receiveSignal(CENTER) == DETECTED) {
             float[] centerArray = Signal.receiveCoordinate(CENTER | DATA_CHANNEL_X, CENTER | DATA_CHANNEL_Y);
             center = new MapLocation(centerArray[0], centerArray[1]);
@@ -61,13 +61,13 @@ public class Map extends BotState {
         return direction.opposite();
     }
 
-    public static void initBorders() {
+    public static void initBorders() throws GameActionException{
         if(Signal.receiveSignal(BORDER) == DETECTED) {
             border = Signal.receiveBorders();
         }
     }
 
-    public static void updateBorders(){
+    public static void updateBorders() throws GameActionException{
         if(Signal.receiveSignal(BORDER) != DETECTED)
             return;
 
