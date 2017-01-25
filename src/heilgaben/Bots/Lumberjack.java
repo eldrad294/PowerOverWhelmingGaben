@@ -12,31 +12,55 @@ public class Lumberjack extends BotState {
     /**
      * State Transitions
      */
+//    private static ConditionState[] chopTransitions = {
+//            new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
+//            new ConditionState(() -> nearbyEnemies.length > 0, State.STRIKING),
+//            new ConditionState(() -> true, State.PATROL)
+//    };
+//    private static ConditionState[] strikeTransitions = {
+//            new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
+//            new ConditionState(() -> nearbyTrees.length > 0, State.CHOPPING),
+//            new ConditionState(() -> true, State.PATROL)
+//    };
+//    private static ConditionState[] shakeTransitions = {
+//            new ConditionState(() -> nearbyTrees.length > 0, State.CHOPPING),
+//            new ConditionState(() -> nearbyEnemies.length > 0, State.STRIKING),
+//            new ConditionState(() -> true, State.PATROL)
+//    };
+//    private static ConditionState[] idleTransitions = {
+//            new ConditionState(() -> nearbyEnemies.length > 0, State.STRIKING),
+//            new ConditionState(() -> nearbyTrees.length > 0, State.CHOPPING),
+//            new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
+//            new ConditionState(() -> true, State.PATROL)
+//    };
+//    private static ConditionState[] patrolTransition = {
+//            new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
+//            new ConditionState(() -> nearbyTrees.length > 0, State.CHOPPING),
+//            new ConditionState(() -> nearbyEnemies.length > 0, State.STRIKING),
+//            new ConditionState(() -> true, State.IDLE)
+//    };
+
     private static ConditionState[] chopTransitions = {
             new ConditionState(() -> nearbyEnemies.length > 0, State.STRIKING),
-            new ConditionState(() -> nearbyTrees.length == 0, State.SCOUTING)
-//            new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES)
+            new ConditionState(() -> nearbyTrees.length == 0, State.PATROL)
     };
     private static ConditionState[] strikeTransitions = {
             new ConditionState(() -> nearbyEnemies.length == 0 && nearbyTrees.length > 0, State.CHOPPING),
-            new ConditionState(() -> nearbyEnemies.length == 0 && nearbyTrees.length == 0, State.SCOUTING)
-//            new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES)
+            new ConditionState(() -> nearbyEnemies.length == 0 && nearbyTrees.length == 0, State.PATROL)
     };
-    private static ConditionState[] scoutTransitions = {
+    private static ConditionState[] patrolTransitions = {
             new ConditionState(() -> nearbyEnemies.length > 0, State.STRIKING),
             new ConditionState(() -> nearbyTrees.length > 0, State.CHOPPING)
-//            new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES)
     };
     private static ConditionState[] shakeTransitions = {
             new ConditionState(() -> Map.getClosestNonemptyBulletTree() == null && nearbyEnemies.length > 0, State.STRIKING),
             new ConditionState(() -> Map.getClosestNonemptyBulletTree() == null && nearbyTrees.length > 0, State.CHOPPING),
-            new ConditionState(() -> Map.getClosestNonemptyBulletTree() == null, State.SCOUTING)
+            new ConditionState(() -> Map.getClosestNonemptyBulletTree() == null, State.PATROL)
     };
     private static ConditionState[] idleTransitions = {
             new ConditionState(() -> nearbyEnemies.length > 0, State.STRIKING),
             new ConditionState(() -> nearbyTrees.length > 0, State.CHOPPING),
-//            new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
-            new ConditionState(() -> true, State.SCOUTING)
+            new ConditionState(() -> true, State.PATROL)
     };
     /**
      * BotType specific run - called every loop
@@ -92,8 +116,8 @@ public class Lumberjack extends BotState {
                 case STRIKING:
                     Action.strike(strikeTransitions);
                     break;
-                case SCOUTING:
-                    Action.scout(scoutTransitions);
+                case PATROL:
+                    Action.patrol(patrolTransitions);
                     break;
                 case SHAKING_TREES:
                     Action.shake(shakeTransitions);
