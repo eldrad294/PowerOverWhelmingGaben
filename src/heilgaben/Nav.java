@@ -60,6 +60,7 @@ public class Nav extends BotState {
         Vector resultant = computeResultantVector(allDirections);
         if(resultant != null)
             return resultant.direction;
+
         return null;
     }
 
@@ -149,7 +150,7 @@ public class Nav extends BotState {
             float attackRange = myRobotSightRadius;
             switch(myType){
                 case SCOUT:
-                    if(state == State.SCOUTING || state == State.DETECTING_BORDER_X || state == State.DETECTING_BORDER_Y)
+                    if(robot.getType() != RobotType.GARDENER && (state == State.SCOUTING || state == State.HARASSING || state == State.DETECTING_BORDER_X || state == State.DETECTING_BORDER_Y))
                         return null;
                     break;
                 case LUMBERJACK:

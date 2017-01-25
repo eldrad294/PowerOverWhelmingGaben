@@ -27,6 +27,7 @@ public class Util extends BotState {
         return null;
     }
 
+
     private static float getRadialSpawnInterval(float spawnObjectRadius) {
         float radius = myBodyRadius + spawnObjectRadius;
         double perimeter = 2 * Math.PI * radius;
@@ -94,5 +95,39 @@ public class Util extends BotState {
         }
 
         return null;
+    }
+
+    public static boolean willBeBlockedByTree(MapLocation end){
+        float delta = 0.5f;
+        float distance = myLocation.distanceTo(end);
+        MapLocation current = myLocation;
+        Direction direction = new Direction(myLocation, end);
+
+        try {
+            for(int i = 0; i < distance; i += delta) {
+                current = current.add(direction, delta);
+                //rc.setIndicatorDot(current, 255, 255, 255);
+                if(myLocation.distanceTo(current) <= myRobotSightRadius) {
+                    if (rc.isLocationOccupiedByTree(current))
+                        return true;
+                }
+            }
+
+            return false;
+        } catch (Exception e) {
+            Debug.out("Collision Check Exception");
+            e.printStackTrace();
+        }
+
+        return true;
+    }
+
+    public static boolean willBeBlockedByTree(RobotInfo[] robotList){
+        for(RobotInfo robot: robotList){
+            if(!willBeBlockedByTree(robot.location))
+                return false;
+        }
+
+        return true;
     }
 }

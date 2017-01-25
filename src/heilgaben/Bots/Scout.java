@@ -29,13 +29,13 @@ public class Scout extends BotState {
             new ConditionState(() -> Map.getClosestNonemptyBulletTree() == null, State.SCOUTING)
     };
     private static ConditionState[] scoutTransitions = {
-            new ConditionState(() -> nearbyEnemies.length > 0, State.HARASSING)
+            new ConditionState(() -> nearbyEnemies.length > 0 && !Util.willBeBlockedByTree(nearbyEnemies), State.HARASSING)
     };
     private static ConditionState[] harassTransitions = {
             new ConditionState(() -> nearbyEnemies.length == 0, State.SCOUTING)
     };
     private static ConditionState[] idleTransitions = {
-            new ConditionState(() -> nearbyEnemies.length > 0, State.HARASSING)
+            new ConditionState(() -> nearbyEnemies.length > 0 && !Util.willBeBlockedByTree(nearbyEnemies), State.HARASSING)
     };
 
     /**

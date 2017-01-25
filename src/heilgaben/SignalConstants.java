@@ -1,7 +1,7 @@
 package heilgaben;
 
 public class SignalConstants {
-    public static final int NO_DATA = -1;
+    public static final int NO_DATA = 0x000000;
     public static final int NO_CHANNEL = 0x000000;
 
     /**

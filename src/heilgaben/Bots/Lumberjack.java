@@ -12,44 +12,29 @@ public class Lumberjack extends BotState {
     /**
      * State Transitions
      */
-//    private static ConditionState[] chopTransitions = {
-//            new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
-//            new ConditionState(() -> nearbyEnemies.length > 0, State.STRIKING),
-//            new ConditionState(() -> true, State.PATROL)
-//    };
-//    private static ConditionState[] strikeTransitions = {
-//            new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
-//            new ConditionState(() -> nearbyTrees.length > 0, State.CHOPPING),
-//            new ConditionState(() -> true, State.PATROL)
-//    };
-//    private static ConditionState[] shakeTransitions = {
-//            new ConditionState(() -> nearbyTrees.length > 0, State.CHOPPING),
-//            new ConditionState(() -> nearbyEnemies.length > 0, State.STRIKING),
-//            new ConditionState(() -> true, State.PATROL)
-//    };
-//    private static ConditionState[] idleTransitions = {
-//            new ConditionState(() -> nearbyEnemies.length > 0, State.STRIKING),
-//            new ConditionState(() -> nearbyTrees.length > 0, State.CHOPPING),
-//            new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
-//            new ConditionState(() -> true, State.PATROL)
-//    };
-//    private static ConditionState[] patrolTransition = {
-//            new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
-//            new ConditionState(() -> nearbyTrees.length > 0, State.CHOPPING),
-//            new ConditionState(() -> nearbyEnemies.length > 0, State.STRIKING),
-//            new ConditionState(() -> true, State.IDLE)
-//    };
 
     private static ConditionState[] chopTransitions = {
+            new ConditionState(() -> {
+                TreeInfo tree = Map.getClosestNonemptyBulletTree();
+                return tree != null && !Util.willBeBlockedByTree(tree.location);
+            }, State.SHAKING_TREES),
             new ConditionState(() -> nearbyEnemies.length > 0, State.STRIKING),
             new ConditionState(() -> nearbyTrees.length == 0, State.PATROL)
     };
     private static ConditionState[] strikeTransitions = {
+            new ConditionState(() -> {
+                TreeInfo tree = Map.getClosestNonemptyBulletTree();
+                return tree != null && !Util.willBeBlockedByTree(tree.location);
+            }, State.SHAKING_TREES),
             new ConditionState(() -> nearbyEnemies.length == 0 && nearbyTrees.length > 0, State.CHOPPING),
             new ConditionState(() -> nearbyEnemies.length == 0 && nearbyTrees.length == 0, State.PATROL)
     };
     private static ConditionState[] patrolTransitions = {
-            new ConditionState(() -> nearbyEnemies.length > 0, State.STRIKING),
+            new ConditionState(() -> nearbyEnemies.length > 0 && !Util.willBeBlockedByTree(nearbyEnemies), State.STRIKING),
+            new ConditionState(() -> {
+                TreeInfo tree = Map.getClosestNonemptyBulletTree();
+                return tree != null && !Util.willBeBlockedByTree(tree.location);
+            }, State.SHAKING_TREES),
             new ConditionState(() -> nearbyTrees.length > 0, State.CHOPPING)
     };
     private static ConditionState[] shakeTransitions = {
@@ -58,7 +43,11 @@ public class Lumberjack extends BotState {
             new ConditionState(() -> Map.getClosestNonemptyBulletTree() == null, State.PATROL)
     };
     private static ConditionState[] idleTransitions = {
-            new ConditionState(() -> nearbyEnemies.length > 0, State.STRIKING),
+            new ConditionState(() -> nearbyEnemies.length > 0 && !Util.willBeBlockedByTree(nearbyEnemies), State.STRIKING),
+            new ConditionState(() -> {
+                TreeInfo tree = Map.getClosestNonemptyBulletTree();
+                return tree != null && !Util.willBeBlockedByTree(tree.location);
+            }, State.SHAKING_TREES),
             new ConditionState(() -> nearbyTrees.length > 0, State.CHOPPING),
             new ConditionState(() -> true, State.PATROL)
     };

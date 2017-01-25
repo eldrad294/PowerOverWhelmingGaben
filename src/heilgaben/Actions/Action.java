@@ -233,11 +233,11 @@ public class Action extends BotState {
                 rc.fireSingleShot(new Direction(myLocation, enemyLocation));
 
             // Scouts also broadcast to allied bots, enemies they have encountered
-            MapLocation enemyLoc = closestEnemy.location;
-            float[] coordinates = {enemyLoc.x, enemyLoc.y};
+            float[] coordinates = {enemyLocation.x, enemyLocation.y};
             Signal.broadcastCoordinate(SignalConstants.SCOUT_START, SignalConstants.SCOUT_START+1, coordinates);
 
-            Nav.moveTo(enemyLocation);
+            Debug.out(closestEnemy.location.toString());
+            Nav.moveTo(myLocation);
 
         } catch (Exception e) {
             Debug.out("Harass Exception");

@@ -19,12 +19,12 @@ public class Tank extends BotState {
     };
 
     private static ConditionState[] patrolTransition = {
-            new ConditionState(() -> nearbyEnemies.length > 0, State.ATTACKING),
+            new ConditionState(() -> nearbyEnemies.length > 0 && !Util.willBeBlockedByTree(nearbyEnemies), State.ATTACKING),
             new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
     };
 
     private static ConditionState[] idleTransitions = {
-            new ConditionState(() -> nearbyEnemies.length > 0, State.ATTACKING),
+            new ConditionState(() -> nearbyEnemies.length > 0 && !Util.willBeBlockedByTree(nearbyEnemies), State.ATTACKING),
             new ConditionState(() -> true, State.PATROL)
     };
 
