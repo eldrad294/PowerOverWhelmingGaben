@@ -14,27 +14,27 @@ public class Lumberjack extends BotState {
      */
 
     private static ConditionState[] chopTransitions = {
-            new ConditionState(() -> {
-                TreeInfo tree = Map.getClosestNonemptyBulletTree();
-                return tree != null && !Util.willBeBlockedByTree(tree.location);
-            }, State.SHAKING_TREES),
+//            new ConditionState(() -> {
+//                TreeInfo tree = Map.getClosestNonemptyBulletTree();
+//                return tree != null && !Util.willBeBlockedByTree(tree.location);
+//            }, State.SHAKING_TREES),
             new ConditionState(() -> nearbyEnemies.length > 0, State.STRIKING),
             new ConditionState(() -> nearbyTrees.length == 0, State.PATROL)
     };
     private static ConditionState[] strikeTransitions = {
-            new ConditionState(() -> {
-                TreeInfo tree = Map.getClosestNonemptyBulletTree();
-                return tree != null && !Util.willBeBlockedByTree(tree.location);
-            }, State.SHAKING_TREES),
+//            new ConditionState(() -> {
+//                TreeInfo tree = Map.getClosestNonemptyBulletTree();
+//                return tree != null && !Util.willBeBlockedByTree(tree.location);
+//            }, State.SHAKING_TREES),
             new ConditionState(() -> nearbyEnemies.length == 0 && nearbyTrees.length > 0, State.CHOPPING),
             new ConditionState(() -> nearbyEnemies.length == 0 && nearbyTrees.length == 0, State.PATROL)
     };
     private static ConditionState[] patrolTransitions = {
             new ConditionState(() -> nearbyEnemies.length > 0 && !Util.willBeBlockedByTree(nearbyEnemies), State.STRIKING),
-            new ConditionState(() -> {
-                TreeInfo tree = Map.getClosestNonemptyBulletTree();
-                return tree != null && !Util.willBeBlockedByTree(tree.location);
-            }, State.SHAKING_TREES),
+//            new ConditionState(() -> {
+//                TreeInfo tree = Map.getClosestNonemptyBulletTree();
+//                return tree != null && !Util.willBeBlockedByTree(tree.location);
+//            }, State.SHAKING_TREES),
             new ConditionState(() -> nearbyTrees.length > 0, State.CHOPPING)
     };
     private static ConditionState[] shakeTransitions = {
@@ -44,10 +44,10 @@ public class Lumberjack extends BotState {
     };
     private static ConditionState[] idleTransitions = {
             new ConditionState(() -> nearbyEnemies.length > 0 && !Util.willBeBlockedByTree(nearbyEnemies), State.STRIKING),
-            new ConditionState(() -> {
-                TreeInfo tree = Map.getClosestNonemptyBulletTree();
-                return tree != null && !Util.willBeBlockedByTree(tree.location);
-            }, State.SHAKING_TREES),
+//            new ConditionState(() -> {
+//                TreeInfo tree = Map.getClosestNonemptyBulletTree();
+//                return tree != null && !Util.willBeBlockedByTree(tree.location);
+//            }, State.SHAKING_TREES),
             new ConditionState(() -> nearbyTrees.length > 0, State.CHOPPING),
             new ConditionState(() -> true, State.PATROL)
     };

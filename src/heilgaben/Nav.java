@@ -151,11 +151,11 @@ public class Nav extends BotState {
             switch(myType){
                 case SCOUT:
                     if(robot.getType() != RobotType.GARDENER && (state == State.SCOUTING || state == State.HARASSING || state == State.DETECTING_BORDER_X || state == State.DETECTING_BORDER_Y))
-                        return null;
+                        continue;
                     break;
                 case LUMBERJACK:
                     if(state != State.STRIKING)
-                        return null;
+                        continue;
                     attackRange = GameConstants.LUMBERJACK_STRIKE_RADIUS;
                     break;
             }

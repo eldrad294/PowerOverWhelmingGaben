@@ -98,36 +98,38 @@ public class Util extends BotState {
     }
 
     public static boolean willBeBlockedByTree(MapLocation end){
-        float delta = 0.5f;
-        float distance = myLocation.distanceTo(end);
-        MapLocation current = myLocation;
-        Direction direction = new Direction(myLocation, end);
+        return false;
+//        float delta = 0.5f;
+//        float distance = myLocation.distanceTo(end);
+//        MapLocation current = myLocation;
+//        Direction direction = new Direction(myLocation, end);
+//
+//        try {
+//            for(int i = 0; i < distance; i += delta) {
+//                current = current.add(direction, delta);
+//                //rc.setIndicatorDot(current, 255, 255, 255);
+//                if(myLocation.distanceTo(current) <= myRobotSightRadius) {
+//                    if (rc.isLocationOccupiedByTree(current))
+//                        return true;
+//                }
+//            }
+//
+//            return false;
+//        } catch (Exception e) {
+//            Debug.out("Collision Check Exception");
+//            e.printStackTrace();
+//        }
 
-        try {
-            for(int i = 0; i < distance; i += delta) {
-                current = current.add(direction, delta);
-                //rc.setIndicatorDot(current, 255, 255, 255);
-                if(myLocation.distanceTo(current) <= myRobotSightRadius) {
-                    if (rc.isLocationOccupiedByTree(current))
-                        return true;
-                }
-            }
-
-            return false;
-        } catch (Exception e) {
-            Debug.out("Collision Check Exception");
-            e.printStackTrace();
-        }
-
-        return true;
+        //return true;
     }
 
     public static boolean willBeBlockedByTree(RobotInfo[] robotList){
-        for(RobotInfo robot: robotList){
-            if(!willBeBlockedByTree(robot.location))
-                return false;
-        }
+        return false;
+//        for(RobotInfo robot: robotList){
+//            if(!willBeBlockedByTree(robot.location))
+//                return false;
+//        }
 
-        return true;
+        //return true;
     }
 }

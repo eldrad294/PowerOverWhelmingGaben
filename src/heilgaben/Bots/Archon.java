@@ -110,7 +110,6 @@ public class Archon extends BotState {
         switch(globalState){
             case NO_CHANNEL:
                 Signal.broadcastSignal(GLOBAL_STATE, OPENING);
-                Debug.out("" + OPENING);
             case OPENING:
                 if(rc.getRoundNum() > 200) {
                     Signal.broadcastSignal(GLOBAL_STATE, MIDGAME);

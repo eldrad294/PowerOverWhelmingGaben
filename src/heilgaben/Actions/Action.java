@@ -236,7 +236,6 @@ public class Action extends BotState {
             float[] coordinates = {enemyLocation.x, enemyLocation.y};
             Signal.broadcastCoordinate(SignalConstants.SCOUT_START, SignalConstants.SCOUT_START+1, coordinates);
 
-            Debug.out(closestEnemy.location.toString());
             Nav.moveTo(myLocation);
 
         } catch (Exception e) {
