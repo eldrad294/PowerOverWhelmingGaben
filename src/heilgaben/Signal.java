@@ -15,16 +15,16 @@ public class Signal extends BotState {
     }
 
     public static void broadcastCoordinate(int channelX, int channelY, float[] data) throws GameActionException{
-        if(channelX != SignalConstants.NO_DATA && channelY != SignalConstants.NO_DATA && data[0] >= 0 && data[1] >= 0) {
+        if(channelX != SignalConstants.NO_CHANNEL && channelY != SignalConstants.NO_CHANNEL && data[0] >= 0 && data[1] >= 0) {
             rc.broadcast(channelX, Float.floatToIntBits(data[0]));
             rc.broadcast(channelY, Float.floatToIntBits(data[1]));
         }
     }
 
     public static int receiveSignal(int channel) throws GameActionException{
-        if(channel >= 0)
+        if(channel > 0)
             return rc.readBroadcast(channel);
-        return SignalConstants.NO_DATA;
+        return SignalConstants.NO_CHANNEL;
     }
 
     public static float[] receiveCoordinate(int channelX, int channelY) throws GameActionException{

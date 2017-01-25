@@ -34,12 +34,12 @@ public class Action extends BotState {
             float[] coordinates;
             for(int channel=0;channel<40;channel+=2) {
                 coordinates = Signal.receiveCoordinate(channel, channel + 1);
-                if(coordinates[0] == 1000 && coordinates[1] == 1000 && rc.getType() != RobotType.SCOUT)
+                if(coordinates[0] == -1 && coordinates[1] == -1 && rc.getType() != RobotType.SCOUT)
                     continue;
-                else if(coordinates[0] > 0 && coordinates[1] > 0 && rc.getType() != RobotType.SCOUT) {
+                else if(rc.getType() != RobotType.SCOUT) {
                     Nav.moveTo(new MapLocation(coordinates[0], coordinates[1]));
                     break;
-                }else {
+                } else {
                     Nav.moveTo(scoutLocation);
                     break;
                 }
@@ -70,13 +70,10 @@ public class Action extends BotState {
         try {
             MapLocation enemyLocation = closestEnemy.location;
 
-            if (rc.canFirePentadShot())
-                rc.firePentadShot(new Direction(myLocation, enemyLocation));
-
             if (rc.canFireSingleShot())
                 rc.fireSingleShot(new Direction(myLocation, enemyLocation));
 
-            Nav.moveTo(enemyLocation);
+            Nav.moveTo(myLocation);
 
         } catch (Exception e) {
             Debug.out("Attack Exception");
@@ -356,9 +353,9 @@ public class Action extends BotState {
             float[] coordinates;
             for(int channel=0;channel<40;channel+=2) {
                 coordinates = Signal.receiveCoordinate(channel, channel + 1);
-                if(coordinates[0] == 1000 && coordinates[1] == 1000 && rc.getType() != RobotType.SCOUT)
+                if(coordinates[0] == -1 && coordinates[1] == -1 && rc.getType() != RobotType.SCOUT)
                     continue;
-                else if(coordinates[0] > 0 && coordinates[1] > 0 && rc.getType() != RobotType.SCOUT) {
+                else if(rc.getType() != RobotType.SCOUT) {
                     Nav.moveTo(new MapLocation(coordinates[0], coordinates[1]));
                     break;
                 }else {
@@ -366,7 +363,6 @@ public class Action extends BotState {
                     break;
                 }
             }
-
         }catch(GameActionException e){
             e.printStackTrace();
         }

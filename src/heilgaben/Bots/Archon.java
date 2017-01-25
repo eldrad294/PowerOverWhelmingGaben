@@ -108,8 +108,9 @@ public class Archon extends BotState {
     private static boolean updateGlobalState() throws GameActionException{
         int globalState = Signal.receiveSignal(GLOBAL_STATE);
         switch(globalState){
-            case NO_DATA:
+            case NO_CHANNEL:
                 Signal.broadcastSignal(GLOBAL_STATE, OPENING);
+                Debug.out("" + OPENING);
             case OPENING:
                 if(rc.getRoundNum() > 200) {
                     Signal.broadcastSignal(GLOBAL_STATE, MIDGAME);

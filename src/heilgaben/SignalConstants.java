@@ -1,7 +1,7 @@
 package heilgaben;
 
 public class SignalConstants {
-    public static final int NO_DATA = 0x000000;
+    public static final int NO_DATA = -1;
     public static final int NO_CHANNEL = 0x000000;
 
     /**
@@ -29,6 +29,9 @@ public class SignalConstants {
     public static final int COMMAND_CHANNEL = 0x000030;
     public static final int REPORT_CHANNEL = 0x000040;
     public static final int COUNT_CHANNEL = 0x000050;
+
+    public static final int SCOUT_START = 0x0026E8;
+    public static final int SCOUT_END = 0x002710;
 
     /**
      * COMMANDS

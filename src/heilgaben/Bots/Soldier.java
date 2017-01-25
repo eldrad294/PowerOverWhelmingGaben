@@ -15,22 +15,17 @@ public class Soldier extends BotState {
      */
     private static ConditionState[] attackTransitions = {
         new ConditionState(() -> nearbyEnemies.length == 0 && Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
-        new ConditionState(() -> nearbyEnemies.length == 0, State.SCOUTING)
+        new ConditionState(() -> nearbyEnemies.length == 0, State.IDLE)
     };
 
     private static ConditionState[] shakeTransitions = {
         new ConditionState(() -> nearbyEnemies.length > 0, State.ATTACKING),
-        new ConditionState(() -> Map.getClosestNonemptyBulletTree() == null, State.SCOUTING),
+        new ConditionState(() -> Map.getClosestNonemptyBulletTree() == null, State.IDLE),
     };
 
-    private static ConditionState[] scoutTransitions = {
-        new ConditionState(() -> nearbyEnemies.length > 0, State.ATTACKING),
-        new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES)
-    };
     private static ConditionState[] idleTransitions = {
         new ConditionState(() -> nearbyEnemies.length > 0, State.ATTACKING),
         new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
-        new ConditionState(() -> true, State.SCOUTING)
     };
 
     /**
@@ -82,13 +77,10 @@ public class Soldier extends BotState {
 
             switch(state){
                 case ATTACKING:
-                    Action.harass(attackTransitions);
+                    Action.attack(attackTransitions);
                     break;
                 case SHAKING_TREES:
                     Action.shake(shakeTransitions);
-                    break;
-                case SCOUTING:
-                    Action.scout(scoutTransitions);
                     break;
                 case IDLE:
                     Action.idle(idleTransitions);

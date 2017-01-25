@@ -116,7 +116,7 @@ public class Nav extends BotState {
         for(BulletInfo bullet: nearbyBullets) {
             MapLocation bulletLocation = bullet.getLocation();
             if(willCollideWithMe(bullet)) {
-                repulsionVectors.add(new Vector(new Direction(bulletLocation, myLocation).rotateLeftDegrees(90), 3));
+                repulsionVectors.add(new Vector(new Direction(bulletLocation, myLocation).rotateLeftDegrees(25), 3));
             } else
                 repulsionVectors.add(new Vector(new Direction(bulletLocation, myLocation), 0.25f));
         }
@@ -146,6 +146,7 @@ public class Nav extends BotState {
         for (RobotInfo robot : nearbyEnemies) {
             MapLocation robotLocation = robot.getLocation();
 
+            float attackRange = myRobotSightRadius;
             switch(myType){
                 case SCOUT:
                     if(state == State.SCOUTING || state == State.DETECTING_BORDER_X || state == State.DETECTING_BORDER_Y)
@@ -154,10 +155,11 @@ public class Nav extends BotState {
                 case LUMBERJACK:
                     if(state != State.STRIKING)
                         return null;
+                    attackRange = GameConstants.LUMBERJACK_STRIKE_RADIUS;
                     break;
             }
 
-            if (myLocation.distanceTo(robotLocation) >= myBodyRadius + robot.getRadius() + GameConstants.LUMBERJACK_STRIKE_RADIUS) {
+            if (myLocation.distanceTo(robotLocation) >= myBodyRadius + robot.getRadius() + attackRange) {
                 attractionVectors.add(new Vector(myLocation, robotLocation));
             }
         }
