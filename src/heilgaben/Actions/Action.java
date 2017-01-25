@@ -2,7 +2,6 @@ package heilgaben.Actions;
 
 import battlecode.common.*;
 import heilgaben.*;
-import scala.util.Random;
 
 import static heilgaben.SignalConstants.*;
 
