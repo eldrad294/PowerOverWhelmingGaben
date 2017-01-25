@@ -17,6 +17,7 @@ public enum State {
     CHOPPING,
 
     // SOLDIER
+    PATROL,
 
     // TANK
     DRIVE,

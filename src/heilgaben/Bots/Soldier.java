@@ -15,15 +15,22 @@ public class Soldier extends BotState {
      */
     private static ConditionState[] attackTransitions = {
         new ConditionState(() -> nearbyEnemies.length == 0 && Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
-        new ConditionState(() -> nearbyEnemies.length == 0, State.IDLE)
+        new ConditionState(() -> nearbyEnemies.length > 0, State.PATROL)
     };
 
     private static ConditionState[] shakeTransitions = {
+        new ConditionState(() -> nearbyEnemies.length == 0, State.PATROL),
         new ConditionState(() -> nearbyEnemies.length > 0, State.ATTACKING),
         new ConditionState(() -> Map.getClosestNonemptyBulletTree() == null, State.IDLE),
     };
 
     private static ConditionState[] idleTransitions = {
+        new ConditionState(() -> nearbyEnemies.length == 0, State.PATROL),
+        new ConditionState(() -> nearbyEnemies.length > 0, State.ATTACKING),
+        new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
+    };
+
+    private static ConditionState[] patrolTransition = {
         new ConditionState(() -> nearbyEnemies.length > 0, State.ATTACKING),
         new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
     };
@@ -81,6 +88,9 @@ public class Soldier extends BotState {
                     break;
                 case SHAKING_TREES:
                     Action.shake(shakeTransitions);
+                    break;
+                case PATROL:
+                    Action.patrol(patrolTransition);
                     break;
                 case IDLE:
                     Action.idle(idleTransitions);

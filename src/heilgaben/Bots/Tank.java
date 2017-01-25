@@ -15,16 +15,17 @@ public class Tank extends BotState {
      */
 
     private static ConditionState[] attackTransitions = {
-            new ConditionState(() -> nearbyEnemies.length == 0, State.DRIVE)
+            new ConditionState(() -> nearbyEnemies.length == 0, State.PATROL)
     };
 
-    private static ConditionState[] driveTransitions = {
+    private static ConditionState[] patrolTransition = {
             new ConditionState(() -> nearbyEnemies.length > 0, State.ATTACKING),
+            new ConditionState(() -> Map.getClosestNonemptyBulletTree() != null, State.SHAKING_TREES),
     };
 
     private static ConditionState[] idleTransitions = {
             new ConditionState(() -> nearbyEnemies.length > 0, State.ATTACKING),
-            new ConditionState(() -> true, State.DRIVE)
+            new ConditionState(() -> true, State.PATROL)
     };
 
     /**
@@ -72,8 +73,8 @@ public class Tank extends BotState {
                 case ATTACKING:
                     Action.attack(attackTransitions);
                     break;
-                case DRIVE:
-                    Action.drive(driveTransitions);
+                case PATROL:
+                    Action.patrol(patrolTransition);
                     break;
                 case IDLE:
                     Action.idle(idleTransitions);
